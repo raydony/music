@@ -1,0 +1,24 @@
+<view class="page page--with-mini-player">
+  <view class="page-heading">
+    <text class="eyebrow">Music Library</text>
+    <text class="page-title">全部曲目</text>
+    <text class="page-description">浏览当前曲库中已发布的佛教音乐内容</text>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading-state">正在载入曲目…</view>
+  <empty-state
+    wx:elif="{{errorMessage && !tracks.length}}"
+    text="{{errorMessage}}"
+    action-text="重新加载"
+    bind:retry="retry"
+  />
+  <empty-state wx:elif="{{!tracks.length}}" text="暂无已发布曲目" />
+  <view wx:else class="surface track-list">
+    <track-item wx:for="{{tracks}}" wx:key="id" track="{{item}}" queue="{{tracks}}" />
+  </view>
+
+  <view wx:if="{{tracks.length}}" class="list-footer">
+    {{loadingMore ? '正在加载…' : finished ? '已显示全部曲目' : '继续上拉加载'}}
+  </view>
+  <mini-player />
+</view>

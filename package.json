@@ -1,0 +1,32 @@
+{
+  "name": "buddhist-music",
+  "version": "0.1.0",
+  "private": true,
+  "description": "佛教音乐微信小程序 MVP",
+  "packageManager": "pnpm@11.19.0",
+  "engines": {
+    "node": ">=24.0.0 <25.0.0",
+    "pnpm": ">=11.0.0"
+  },
+  "scripts": {
+    "dev:server": "pnpm --filter server start:dev",
+    "dev:admin": "pnpm --filter admin dev",
+    "build": "pnpm --filter server build && pnpm --filter admin build",
+    "lint": "pnpm -r --if-present lint",
+    "typecheck": "pnpm -r --if-present typecheck",
+    "test": "pnpm --filter server test",
+    "test:e2e": "pnpm --filter server test:e2e",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:generate": "pnpm --filter server db:generate",
+    "db:migrate": "pnpm --filter server db:migrate",
+    "db:seed": "pnpm --filter server db:seed",
+    "db:verify": "pnpm --filter server db:verify",
+    "db:studio": "pnpm --filter server db:studio"
+  },
+  "devDependencies": {
+    "prettier": "^3.8.2"
+  }
+}

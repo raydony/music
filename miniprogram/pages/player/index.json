@@ -1,0 +1,6 @@
+{
+  "navigationBarTitleText": "正在播放",
+  "usingComponents": {
+    "play-queue": "/components/play-queue/index"
+  }
+}

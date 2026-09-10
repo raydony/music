@@ -1,0 +1,61 @@
+.album-hero {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 24rpx 12rpx 42rpx;
+  text-align: center;
+}
+
+.album-hero__cover {
+  width: 420rpx;
+  height: 420rpx;
+  overflow: hidden;
+  border-radius: 32rpx;
+  box-shadow: 0 24rpx 58rpx rgba(36, 61, 49, 0.13);
+}
+
+.album-hero__title {
+  margin-top: 34rpx;
+  color: #25382f;
+  font-size: 38rpx;
+  font-weight: 650;
+}
+
+.album-hero__artist {
+  margin-top: 13rpx;
+  color: #557466;
+  font-size: 26rpx;
+}
+
+.album-hero__year {
+  margin-top: 9rpx;
+  color: #89948e;
+  font-size: 23rpx;
+}
+
+.description-card {
+  display: flex;
+  flex-direction: column;
+  padding: 30rpx;
+}
+
+.description-card__title {
+  color: #34483e;
+  font-size: 27rpx;
+  font-weight: 600;
+}
+
+.description-card__content {
+  margin-top: 14rpx;
+  color: #6f7f77;
+  font-size: 25rpx;
+  line-height: 1.8;
+}
+
+.tracks-section {
+  padding-bottom: 42rpx;
+}
+
+.track-list {
+  padding: 0 24rpx;
+}

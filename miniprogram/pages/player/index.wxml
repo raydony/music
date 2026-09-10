@@ -1,0 +1,81 @@
+<view class="player-page">
+  <view wx:if="{{!currentTrack}}" class="player-empty">
+    <text class="player-empty__title">还没有正在播放的音乐</text>
+    <text class="player-empty__description">从首页、分类或专辑中选择一首曲目开始聆听</text>
+    <button class="player-empty__button" bindtap="goHome">返回首页</button>
+  </view>
+
+  <block wx:else>
+    <view class="player-artwork">
+      <media-artwork src="{{currentTrack.coverUrl || ''}}" label="音" />
+    </view>
+
+    <view class="player-heading">
+      <text class="player-heading__title">{{currentTrack.title}}</text>
+      <text wx:if="{{currentTrack.subtitle}}" class="player-heading__subtitle">{{currentTrack.subtitle}}</text>
+      <text class="player-heading__artist" bindtap="openArtist">{{currentTrack.artist.name}}</text>
+      <text wx:if="{{currentTrack.album}}" class="player-heading__album" bindtap="openAlbum">
+        {{currentTrack.album.title}}
+      </text>
+    </view>
+
+    <scroll-view
+      class="lyrics-view"
+      scroll-y
+      scroll-with-animation
+      scroll-into-view="{{lyricAnchor}}"
+      enhanced
+    >
+      <view wx:if="{{lyrics.length}}" class="lyrics-list">
+        <text
+          wx:for="{{lyrics}}"
+          wx:key="key"
+          id="lyric-{{index}}"
+          class="lyrics-line {{hasSynchronizedLyrics && index === activeLyricIndex ? 'lyrics-line--active' : ''}}"
+        >
+          {{item.text}}
+        </text>
+      </view>
+      <view wx:else class="lyrics-empty">暂无唱词</view>
+    </scroll-view>
+
+    <view class="progress-area">
+      <slider
+        min="0"
+        max="{{duration || 1}}"
+        step="0.1"
+        value="{{sliderValue}}"
+        activeColor="#527363"
+        backgroundColor="#d6dfd9"
+        block-color="#527363"
+        block-size="16"
+        bindchanging="onSliderChanging"
+        bindchange="onSliderChange"
+      />
+      <view class="progress-area__times">
+        <text>{{currentTimeLabel}}</text>
+        <text>{{durationLabel}}</text>
+      </view>
+    </view>
+
+    <view class="player-controls">
+      <view class="player-toolbar">
+        <button class="mode-button" bindtap="cyclePlayMode">
+          <text>{{playModeLabel}}</text>
+          <text class="mode-button__queue">{{queuePosition}}</text>
+        </button>
+        <button class="queue-button" bindtap="openQueue">☷ 播放列表</button>
+      </view>
+      <view class="transport-controls">
+        <button class="transport-button" aria-label="上一首" bindtap="previous">|‹</button>
+        <button class="transport-button transport-button--primary" bindtap="togglePlayback">
+          {{status === 'playing' ? 'Ⅱ' : status === 'loading' ? '···' : '▶'}}
+        </button>
+        <button class="transport-button" aria-label="下一首" bindtap="next">›|</button>
+      </view>
+      <text wx:if="{{status === 'error'}}" class="player-error">播放失败，点击播放重试</text>
+    </view>
+  </block>
+</view>
+
+<play-queue visible="{{queueVisible}}" bindclose="closeQueue" />

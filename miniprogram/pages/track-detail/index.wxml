@@ -1,0 +1,95 @@
+<view class="page page--with-mini-player">
+  <view wx:if="{{loading}}" class="loading-state">正在载入曲目…</view>
+  <empty-state
+    wx:elif="{{errorMessage}}"
+    text="{{errorMessage}}"
+    action-text="重新加载"
+    bind:retry="retry"
+  />
+
+  <block wx:elif="{{track}}">
+    <view class="track-hero">
+      <view class="track-hero__cover">
+        <media-artwork src="{{track.coverUrl || ''}}" label="音" />
+      </view>
+      <text class="track-hero__title">{{track.title}}</text>
+      <text wx:if="{{track.subtitle}}" class="track-hero__subtitle">{{track.subtitle}}</text>
+      <text
+        class="track-hero__artist"
+        aria-role="button"
+        aria-label="查看艺术家 {{track.artist.name}}"
+        bindtap="openArtist"
+      >
+        {{track.artist.name}} ›
+      </text>
+    </view>
+
+    <view class="surface audio-card">
+      <view class="audio-card__times">
+        <text>{{currentTimeLabel}}</text>
+        <text>{{track.durationLabel}}</text>
+      </view>
+      <slider
+        class="audio-card__slider"
+        min="0"
+        max="100"
+        value="{{progress}}"
+        activeColor="#527363"
+        backgroundColor="#dce4de"
+        block-color="#527363"
+        block-size="16"
+        bindchange="seek"
+      />
+      <button class="audio-card__button" bindtap="togglePlayback">
+        {{isCurrentTrack && playerStatus === 'playing' ? '暂停播放' : playerStatus === 'loading' ? '正在加载…' : playerStatus === 'error' ? '重试播放' : '播放曲目'}}
+      </button>
+      <button wx:if="{{isCurrentTrack}}" class="audio-card__player-link" bindtap="openPlayer">
+        进入完整播放页
+      </button>
+      <text wx:if="{{isCurrentTrack && playerStatus === 'error'}}" class="audio-card__error">
+        播放失败，请检查音频地址后重试
+      </text>
+      <text class="audio-card__notice">使用全局后台播放器，切换页面不会停止音乐</text>
+    </view>
+
+    <view class="surface metadata-card">
+      <view class="metadata-row">
+        <text class="metadata-row__label">专辑</text>
+        <text
+          wx:if="{{track.album}}"
+          class="metadata-row__value metadata-row__link"
+          aria-role="button"
+          aria-label="查看专辑 {{track.album.title}}"
+          bindtap="openAlbum"
+        >
+          {{track.album.title}} ›
+        </text>
+        <text wx:else class="metadata-row__value">未归入专辑</text>
+      </view>
+      <view class="metadata-row">
+        <text class="metadata-row__label">分类</text>
+        <text
+          class="metadata-row__value metadata-row__link"
+          aria-role="button"
+          aria-label="查看分类 {{track.category.name}}"
+          bindtap="openCategory"
+        >
+          {{track.category.name}} ›
+        </text>
+      </view>
+      <view class="metadata-row">
+        <text class="metadata-row__label">时长</text>
+        <text class="metadata-row__value">{{track.durationLabel}}</text>
+      </view>
+    </view>
+
+    <view class="page-section lyrics-section">
+      <section-header title="歌词 / 唱词" />
+      <view wx:if="{{track.lyricsLines.length}}" class="surface lyrics-card">
+        <text wx:for="{{track.lyricsLines}}" wx:key="index" class="lyrics-line">{{item}}</text>
+      </view>
+      <empty-state wx:else text="暂无歌词或唱词" />
+    </view>
+  </block>
+  <mini-player />
+</view>

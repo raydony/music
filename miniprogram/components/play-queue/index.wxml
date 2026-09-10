@@ -1,0 +1,41 @@
+<view wx:if="{{visible}}" class="play-queue">
+  <view class="play-queue__mask" aria-label="关闭播放列表" catchtap="close" />
+  <view class="play-queue__sheet" aria-role="dialog" aria-label="当前播放列表">
+    <view class="play-queue__header">
+      <view>
+        <text class="play-queue__title">当前播放列表</text>
+        <text class="play-queue__count">{{queue.length}} 首</text>
+      </view>
+      <button class="play-queue__close" aria-label="关闭播放列表" catchtap="close">×</button>
+    </view>
+
+    <scroll-view
+      wx:if="{{queue.length}}"
+      class="play-queue__list"
+      scroll-y
+      scroll-with-animation
+      scroll-into-view="{{queueAnchor}}"
+      enhanced
+    >
+      <button
+        wx:for="{{queue}}"
+        wx:key="id"
+        id="queue-track-{{index}}"
+        class="play-queue__item {{item.id === currentTrackId ? 'play-queue__item--current' : ''}}"
+        aria-label="播放 {{item.title}}"
+        data-index="{{index}}"
+        catchtap="selectTrack"
+      >
+        <text class="play-queue__indicator">
+          {{item.id === currentTrackId ? (status === 'playing' ? '♪' : '当前') : index + 1}}
+        </text>
+        <view class="play-queue__info">
+          <text class="play-queue__track-title">{{item.title}}</text>
+          <text class="play-queue__artist">{{item.artist.name}}</text>
+        </view>
+      </button>
+    </scroll-view>
+
+    <view wx:else class="play-queue__empty">当前播放列表为空</view>
+  </view>
+</view>

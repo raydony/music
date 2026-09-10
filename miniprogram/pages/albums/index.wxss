@@ -1,0 +1,48 @@
+.page-heading {
+  padding: 26rpx 8rpx 34rpx;
+}
+
+.album-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 34rpx 22rpx;
+}
+
+.album-card {
+  min-width: 0;
+}
+
+.album-card__cover {
+  width: 100%;
+  height: 326rpx;
+  overflow: hidden;
+  border-radius: 24rpx;
+}
+
+.album-card__title,
+.album-card__artist,
+.album-card__meta {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.album-card__title {
+  margin-top: 17rpx;
+  color: #283b32;
+  font-size: 28rpx;
+  font-weight: 600;
+}
+
+.album-card__artist {
+  margin-top: 8rpx;
+  color: #77867e;
+  font-size: 23rpx;
+}
+
+.album-card__meta {
+  margin-top: 6rpx;
+  color: #9aa29d;
+  font-size: 21rpx;
+}

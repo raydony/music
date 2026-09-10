@@ -1,0 +1,24 @@
+<view
+  class="track"
+  aria-role="button"
+  aria-label="{{track.title}}，{{track.artist.name}}，时长 {{track.durationLabel}}"
+  bindtap="playAndOpenPlayer"
+  hover-class="track--pressed"
+>
+  <view class="track__cover">
+    <media-artwork src="{{track.coverUrl || ''}}" label="音" />
+  </view>
+  <view class="track__body">
+    <text class="track__title">{{track.title}}</text>
+    <text wx:if="{{track.subtitle}}" class="track__subtitle">{{track.subtitle}}</text>
+    <text class="track__meta">{{track.artist.name}}</text>
+  </view>
+  <text class="track__duration">{{track.durationLabel}}</text>
+  <button
+    class="track__play"
+    aria-label="{{isCurrent && playerStatus === 'playing' ? '暂停' : '播放'}} {{track.title}}"
+    catchtap="togglePlayback"
+  >
+    {{isCurrent && playerStatus === 'playing' ? 'Ⅱ' : playerStatus === 'loading' && isCurrent ? '···' : '▶'}}
+  </button>
+</view>

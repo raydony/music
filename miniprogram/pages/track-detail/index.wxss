@@ -1,0 +1,144 @@
+.track-hero {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 20rpx 12rpx 40rpx;
+  text-align: center;
+}
+
+.track-hero__cover {
+  width: 430rpx;
+  height: 430rpx;
+  overflow: hidden;
+  border-radius: 34rpx;
+  box-shadow: 0 26rpx 58rpx rgba(35, 59, 48, 0.14);
+}
+
+.track-hero__title {
+  margin-top: 36rpx;
+  color: #25382f;
+  font-size: 40rpx;
+  font-weight: 650;
+}
+
+.track-hero__subtitle {
+  margin-top: 10rpx;
+  color: #88938d;
+  font-size: 24rpx;
+}
+
+.track-hero__artist {
+  margin-top: 15rpx;
+  color: #527363;
+  font-size: 27rpx;
+}
+
+.audio-card {
+  padding: 28rpx 30rpx 30rpx;
+}
+
+.audio-card__times {
+  display: flex;
+  justify-content: space-between;
+  color: #7d8a83;
+  font-size: 22rpx;
+  font-variant-numeric: tabular-nums;
+}
+
+.audio-card__slider {
+  margin: 10rpx -12rpx 18rpx;
+}
+
+.audio-card__button {
+  border: 0;
+  border-radius: 999rpx;
+  color: #fff;
+  background: #496b5b;
+  font-size: 27rpx;
+  font-weight: 600;
+  line-height: 82rpx;
+}
+
+.audio-card__button::after {
+  border: 0;
+}
+
+.audio-card__player-link {
+  margin-top: 16rpx;
+  border: 0;
+  border-radius: 999rpx;
+  color: #496b5b;
+  background: #eef3f0;
+  font-size: 24rpx;
+  line-height: 72rpx;
+}
+
+.audio-card__player-link::after {
+  border: 0;
+}
+
+.audio-card__error,
+.audio-card__notice {
+  display: block;
+  margin-top: 18rpx;
+  font-size: 22rpx;
+  text-align: center;
+}
+
+.audio-card__error {
+  color: #a65e55;
+}
+
+.audio-card__notice {
+  color: #929b96;
+}
+
+.metadata-card {
+  margin-top: 22rpx;
+  padding: 10rpx 28rpx;
+}
+
+.metadata-row {
+  display: flex;
+  align-items: center;
+  min-height: 86rpx;
+  border-bottom: 1rpx solid #edf0ec;
+  font-size: 25rpx;
+}
+
+.metadata-row:last-child {
+  border-bottom: 0;
+}
+
+.metadata-row__label {
+  width: 100rpx;
+  color: #8a958f;
+}
+
+.metadata-row__value {
+  flex: 1;
+  color: #33473d;
+  text-align: right;
+}
+
+.metadata-row__link {
+  color: #527363;
+}
+
+.lyrics-section {
+  padding-bottom: 42rpx;
+}
+
+.lyrics-card {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 38rpx 30rpx;
+}
+
+.lyrics-line {
+  color: #4c5e55;
+  font-size: 27rpx;
+  line-height: 2.2;
+  text-align: center;
+}

@@ -1,0 +1,113 @@
+.app-shell {
+  min-height: 100vh;
+}
+
+.sidebar {
+  position: sticky !important;
+  top: 0;
+  height: 100vh;
+  border-right: 1px solid #e7ebe8;
+}
+
+.brand {
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 22px;
+  color: #28493d;
+  font-size: 17px;
+  font-weight: 650;
+}
+
+.brand-mark {
+  width: 30px;
+  height: 30px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  background: #426b5a;
+  color: #fff;
+  font-size: 15px;
+}
+
+.header {
+  height: 64px;
+  padding: 0 28px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  background: #fff;
+  border-bottom: 1px solid #e7ebe8;
+}
+
+.content {
+  min-width: 0;
+  margin: 24px;
+}
+
+.page-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.page-heading h2.ant-typography {
+  margin: 0 0 4px;
+  color: #26352f;
+  font-size: 24px;
+}
+
+.table-card {
+  overflow: hidden;
+  background: #fff;
+  border: 1px solid #e7ebe8;
+  border-radius: 10px;
+}
+
+.table-pagination {
+  display: flex;
+  justify-content: flex-end;
+  padding: 18px 20px;
+  border-top: 1px solid #f0f2f0;
+}
+
+.stat-card {
+  border-color: #e7ebe8;
+}
+
+.stat-card .ant-statistic-content {
+  color: #31594b;
+}
+
+.quick-note {
+  margin: 18px 0 0 !important;
+}
+
+.form-hint {
+  margin: -10px 0 20px;
+}
+
+.full-width {
+  width: 100%;
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    display: none;
+  }
+
+  .content {
+    margin: 16px;
+  }
+
+  .header {
+    padding: 0 18px;
+  }
+
+  .header .ant-typography:last-child {
+    display: none;
+  }
+}

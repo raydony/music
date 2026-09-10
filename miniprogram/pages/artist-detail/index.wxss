@@ -1,0 +1,105 @@
+.artist-hero {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  padding: 32rpx 12rpx 46rpx;
+  text-align: center;
+}
+
+.artist-hero__avatar {
+  width: 224rpx;
+  height: 224rpx;
+  filter: drop-shadow(0 20rpx 32rpx rgba(48, 76, 63, 0.12));
+}
+
+.artist-hero__name {
+  margin-top: 30rpx;
+  color: #263a31;
+  font-size: 40rpx;
+  font-weight: 650;
+}
+
+.artist-hero__type {
+  margin-top: 14rpx;
+  padding: 7rpx 20rpx;
+  border-radius: 999rpx;
+  color: #4e6e5f;
+  background: #e3ebe5;
+  font-size: 22rpx;
+}
+
+.artist-hero__count {
+  margin-top: 16rpx;
+  color: #87928c;
+  font-size: 23rpx;
+}
+
+.description-card {
+  display: flex;
+  flex-direction: column;
+  padding: 30rpx;
+}
+
+.description-card__title {
+  color: #34483e;
+  font-size: 27rpx;
+  font-weight: 600;
+}
+
+.description-card__content {
+  margin-top: 14rpx;
+  color: #6f7f77;
+  font-size: 25rpx;
+  line-height: 1.8;
+}
+
+.album-section {
+  padding-bottom: 42rpx;
+}
+
+.album-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+}
+
+.album-row {
+  display: flex;
+  align-items: center;
+  padding: 20rpx;
+}
+
+.album-row__cover {
+  width: 112rpx;
+  height: 112rpx;
+  overflow: hidden;
+  border-radius: 17rpx;
+}
+
+.album-row__body {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 22rpx;
+}
+
+.album-row__title {
+  overflow: hidden;
+  color: #2d4037;
+  font-size: 28rpx;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.album-row__meta {
+  margin-top: 10rpx;
+  color: #859189;
+  font-size: 23rpx;
+}
+
+.album-row__arrow {
+  color: #a2aaa5;
+  font-size: 38rpx;
+}

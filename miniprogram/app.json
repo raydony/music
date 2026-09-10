@@ -1,0 +1,31 @@
+{
+  "pages": [
+    "pages/home/index",
+    "pages/player/index",
+    "pages/tracks/index",
+    "pages/track-detail/index",
+    "pages/categories/index",
+    "pages/category-tracks/index",
+    "pages/albums/index",
+    "pages/album-detail/index",
+    "pages/artists/index",
+    "pages/artist-detail/index"
+  ],
+  "window": {
+    "navigationBarTitleText": "佛教音乐",
+    "navigationBarBackgroundColor": "#f4f6f2",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#f4f6f2",
+    "backgroundTextStyle": "dark"
+  },
+  "usingComponents": {
+    "empty-state": "/components/empty-state/index",
+    "media-artwork": "/components/media-artwork/index",
+    "section-header": "/components/section-header/index",
+    "track-item": "/components/track-item/index",
+    "mini-player": "/components/mini-player/index"
+  },
+  "requiredBackgroundModes": ["audio"],
+  "style": "v2",
+  "sitemapLocation": "sitemap.json"
+}

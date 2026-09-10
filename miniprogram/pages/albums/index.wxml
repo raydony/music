@@ -1,0 +1,39 @@
+<view class="page page--with-mini-player">
+  <view class="page-heading">
+    <text class="eyebrow">Albums</text>
+    <text class="page-title">音乐专辑</text>
+    <text class="page-description">按专辑浏览整理后的音乐内容</text>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading-state">正在载入专辑…</view>
+  <empty-state
+    wx:elif="{{errorMessage && !albums.length}}"
+    text="{{errorMessage}}"
+    action-text="重新加载"
+    bind:retry="retry"
+  />
+  <empty-state wx:elif="{{!albums.length}}" text="暂无专辑" />
+  <view wx:else class="album-grid">
+    <view
+      wx:for="{{albums}}"
+      wx:key="id"
+      class="album-card"
+      aria-role="button"
+      aria-label="查看专辑 {{item.title}}"
+      data-id="{{item.id}}"
+      bindtap="openAlbum"
+    >
+      <view class="album-card__cover">
+        <media-artwork src="{{item.coverUrl || ''}}" label="辑" />
+      </view>
+      <text class="album-card__title">{{item.title}}</text>
+      <text class="album-card__artist">{{item.artist.name}}</text>
+      <text class="album-card__meta">{{item.yearLabel}} · {{item.publishedTrackCount}} 首</text>
+    </view>
+  </view>
+
+  <view wx:if="{{albums.length}}" class="list-footer">
+    {{loadingMore ? '正在加载…' : finished ? '已显示全部专辑' : '继续上拉加载'}}
+  </view>
+  <mini-player />
+</view>

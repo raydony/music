@@ -1,0 +1,76 @@
+.track {
+  display: flex;
+  align-items: center;
+  min-height: 112rpx;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #edf0ec;
+}
+
+.track--pressed {
+  opacity: 0.72;
+}
+
+.track__cover {
+  width: 92rpx;
+  height: 92rpx;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border-radius: 16rpx;
+}
+
+.track__body {
+  min-width: 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  margin-left: 22rpx;
+}
+
+.track__title,
+.track__subtitle,
+.track__meta {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.track__title {
+  color: #26352f;
+  font-size: 30rpx;
+  font-weight: 600;
+}
+
+.track__subtitle,
+.track__meta {
+  margin-top: 6rpx;
+  color: #7c8982;
+  font-size: 23rpx;
+}
+
+.track__duration {
+  margin-left: 16rpx;
+  color: #8a948e;
+  font-size: 24rpx;
+  font-variant-numeric: tabular-nums;
+}
+
+.track__play {
+  width: 66rpx;
+  height: 66rpx;
+  box-sizing: border-box;
+  flex: 0 0 66rpx;
+  align-self: center;
+  margin: 0 0 0 14rpx;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  color: #466858;
+  background: #edf3ef;
+  font-size: 22rpx;
+  font-weight: 650;
+  line-height: 66rpx;
+}
+
+.track__play::after {
+  border: 0;
+}

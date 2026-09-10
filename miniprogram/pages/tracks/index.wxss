@@ -1,0 +1,7 @@
+.page-heading {
+  padding: 26rpx 8rpx 34rpx;
+}
+
+.track-list {
+  padding: 0 24rpx;
+}

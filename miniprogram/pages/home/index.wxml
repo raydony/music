@@ -1,0 +1,94 @@
+<view class="page page--with-mini-player">
+  <view class="hero">
+    <text class="eyebrow">Buddhist Music</text>
+    <text class="hero__title">佛教音乐</text>
+    <text class="hero__subtitle">聆听梵音 · 发现佛教音乐文化</text>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading-state">正在载入曲库…</view>
+  <empty-state
+    wx:elif="{{errorMessage}}"
+    text="{{errorMessage}}"
+    action-text="重新加载"
+    bind:retry="retry"
+  />
+
+  <block wx:else>
+    <view class="page-section page-section--first">
+      <section-header title="音乐分类" url="/pages/categories/index" />
+      <view class="category-grid">
+        <view
+          wx:for="{{categories}}"
+          wx:key="id"
+          class="category-card"
+          aria-role="button"
+          aria-label="查看 {{item.name}} 分类"
+          data-id="{{item.id}}"
+          data-name="{{item.name}}"
+          bindtap="openCategory"
+        >
+          <view class="category-card__mark">{{item.name}}</view>
+          <text class="category-card__count">{{item.publishedTrackCount}} 首已收录</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="page-section">
+      <section-header title="最新收录" url="/pages/tracks/index" />
+      <view wx:if="{{tracks.length}}" class="surface track-list">
+        <track-item wx:for="{{tracks}}" wx:key="id" track="{{item}}" queue="{{tracks}}" />
+      </view>
+      <empty-state wx:else text="暂无已发布曲目" />
+    </view>
+
+    <view class="page-section">
+      <section-header title="音乐专辑" url="/pages/albums/index" />
+      <scroll-view wx:if="{{albums.length}}" class="album-scroll" scroll-x enhanced>
+        <view class="album-row">
+          <view
+            wx:for="{{albums}}"
+            wx:key="id"
+            class="album-card"
+            aria-role="button"
+            aria-label="查看专辑 {{item.title}}"
+            data-id="{{item.id}}"
+            bindtap="openAlbum"
+          >
+            <view class="album-card__cover">
+              <media-artwork src="{{item.coverUrl || ''}}" label="辑" />
+            </view>
+            <text class="album-card__title">{{item.title}}</text>
+            <text class="album-card__artist">{{item.artist.name}}</text>
+          </view>
+        </view>
+      </scroll-view>
+      <empty-state wx:else text="暂无专辑" />
+    </view>
+
+    <view class="page-section page-section--last">
+      <section-header title="艺术家与传承团体" url="/pages/artists/index" />
+      <view wx:if="{{artists.length}}" class="surface artist-list">
+        <view
+          wx:for="{{artists}}"
+          wx:key="id"
+          class="artist-row"
+          aria-role="button"
+          aria-label="查看艺术家 {{item.name}}"
+          data-id="{{item.id}}"
+          bindtap="openArtist"
+        >
+          <view class="artist-row__avatar">
+            <media-artwork src="{{item.avatarUrl || ''}}" label="人" circle />
+          </view>
+          <view class="artist-row__body">
+            <text class="artist-row__name">{{item.name}}</text>
+            <text class="artist-row__type">{{item.typeLabel}}</text>
+          </view>
+          <text class="artist-row__arrow">›</text>
+        </view>
+      </view>
+      <empty-state wx:else text="暂无艺术家" />
+    </view>
+  </block>
+  <mini-player />
+</view>

@@ -1,0 +1,13 @@
+<view class="section-header">
+  <text class="section-header__title">{{title}}</text>
+  <view
+    wx:if="{{url}}"
+    class="section-header__link"
+    aria-role="button"
+    aria-label="{{linkText}} {{title}}"
+    bindtap="openLink"
+  >
+    <text>{{linkText}}</text>
+    <text class="section-header__arrow">›</text>
+  </view>
+</view>

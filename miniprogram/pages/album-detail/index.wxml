@@ -1,0 +1,46 @@
+<view class="page page--with-mini-player">
+  <view wx:if="{{loading}}" class="loading-state">正在载入专辑…</view>
+  <empty-state
+    wx:elif="{{errorMessage}}"
+    text="{{errorMessage}}"
+    action-text="重新加载"
+    bind:retry="retry"
+  />
+
+  <block wx:elif="{{album}}">
+    <view class="album-hero">
+      <view class="album-hero__cover">
+        <media-artwork src="{{album.coverUrl || ''}}" label="辑" />
+      </view>
+      <text class="album-hero__title">{{album.title}}</text>
+      <text
+        class="album-hero__artist"
+        aria-role="button"
+        aria-label="查看艺术家 {{album.artist.name}}"
+        bindtap="openArtist"
+      >
+        {{album.artist.name}} ›
+      </text>
+      <text class="album-hero__year">{{album.yearLabel}}</text>
+    </view>
+
+    <view wx:if="{{album.description}}" class="surface description-card">
+      <text class="description-card__title">专辑简介</text>
+      <text class="description-card__content">{{album.description}}</text>
+    </view>
+
+    <view class="page-section tracks-section">
+      <section-header title="专辑曲目" />
+      <view wx:if="{{album.trackViews.length}}" class="surface track-list">
+        <track-item
+          wx:for="{{album.trackViews}}"
+          wx:key="id"
+          track="{{item}}"
+          queue="{{album.trackViews}}"
+        />
+      </view>
+      <empty-state wx:else text="暂无已发布曲目" />
+    </view>
+  </block>
+  <mini-player />
+</view>

@@ -1,0 +1,69 @@
+.page-heading {
+  padding: 26rpx 8rpx 34rpx;
+}
+
+.artist-list {
+  display: flex;
+  flex-direction: column;
+  gap: 18rpx;
+}
+
+.artist-card {
+  display: flex;
+  align-items: center;
+  min-height: 148rpx;
+  padding: 26rpx;
+  box-sizing: border-box;
+}
+
+.artist-card__avatar {
+  width: 92rpx;
+  height: 92rpx;
+  flex: 0 0 auto;
+}
+
+.artist-card__body {
+  min-width: 0;
+  flex: 1;
+  margin-left: 24rpx;
+}
+
+.artist-card__headline {
+  display: flex;
+  align-items: center;
+}
+
+.artist-card__name {
+  overflow: hidden;
+  color: #2b3e35;
+  font-size: 29rpx;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.artist-card__type {
+  flex: 0 0 auto;
+  margin-left: 14rpx;
+  padding: 5rpx 13rpx;
+  border-radius: 999rpx;
+  color: #587365;
+  background: #e8eee9;
+  font-size: 20rpx;
+}
+
+.artist-card__description {
+  display: block;
+  margin-top: 12rpx;
+  overflow: hidden;
+  color: #839087;
+  font-size: 23rpx;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.artist-card__arrow {
+  margin-left: 14rpx;
+  color: #9ca69f;
+  font-size: 38rpx;
+}

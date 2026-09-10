@@ -1,0 +1,44 @@
+<view class="page page--with-mini-player">
+  <view class="page-heading">
+    <text class="eyebrow">Artists</text>
+    <text class="page-title">艺术家与传承团体</text>
+    <text class="page-description">认识音乐背后的法师、寺院、僧团与创作者</text>
+  </view>
+
+  <view wx:if="{{loading}}" class="loading-state">正在载入艺术家…</view>
+  <empty-state
+    wx:elif="{{errorMessage && !artists.length}}"
+    text="{{errorMessage}}"
+    action-text="重新加载"
+    bind:retry="retry"
+  />
+  <empty-state wx:elif="{{!artists.length}}" text="暂无艺术家" />
+  <view wx:else class="artist-list">
+    <view
+      wx:for="{{artists}}"
+      wx:key="id"
+      class="surface artist-card"
+      aria-role="button"
+      aria-label="查看艺术家 {{item.name}}"
+      data-id="{{item.id}}"
+      bindtap="openArtist"
+    >
+      <view class="artist-card__avatar">
+        <media-artwork src="{{item.avatarUrl || ''}}" label="人" circle />
+      </view>
+      <view class="artist-card__body">
+        <view class="artist-card__headline">
+          <text class="artist-card__name">{{item.name}}</text>
+          <text class="artist-card__type">{{item.typeLabel}}</text>
+        </view>
+        <text class="artist-card__description">{{item.description || '暂无简介'}}</text>
+      </view>
+      <text class="artist-card__arrow">›</text>
+    </view>
+  </view>
+
+  <view wx:if="{{artists.length}}" class="list-footer">
+    {{loadingMore ? '正在加载…' : finished ? '已显示全部艺术家' : '继续上拉加载'}}
+  </view>
+  <mini-player />
+</view>

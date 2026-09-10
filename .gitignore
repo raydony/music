@@ -1,0 +1,37 @@
+# Dependencies and package manager artifacts
+node_modules/
+.pnpm-store/
+
+# Build and test output
+dist/
+coverage/
+*.tsbuildinfo
+.cache/
+.vite/
+
+# Environment variables and secrets
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+pnpm-debug.log*
+
+# Editors and operating systems
+.DS_Store
+.vscode/
+.idea/
+
+# NestJS and Prisma generated output
+server/src/generated/
+server/generated/
+
+# WeChat Developer Tools local output
+miniprogram/project.private.config.json
+miniprogram/miniprogram_npm/
+miniprogram/.miniprogram-ci/
+
+# Local PostgreSQL data, if a bind mount is used later
+.postgres-data/

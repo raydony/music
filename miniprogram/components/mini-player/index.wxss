@@ -1,0 +1,99 @@
+.mini-player {
+  position: fixed;
+  z-index: 80;
+  right: 24rpx;
+  bottom: calc(18rpx + env(safe-area-inset-bottom));
+  left: 24rpx;
+  display: flex;
+  align-items: center;
+  box-sizing: border-box;
+  min-height: 112rpx;
+  overflow: hidden;
+  border: 1rpx solid rgba(45, 70, 58, 0.1);
+  border-radius: 24rpx;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 16rpx 46rpx rgba(35, 57, 47, 0.16);
+}
+
+.mini-player__progress {
+  position: absolute;
+  top: 0;
+  right: 0;
+  left: 0;
+  height: 4rpx;
+  background: #e3e9e5;
+}
+
+.mini-player__progress-value {
+  height: 100%;
+  background: #527363;
+  transition: width 0.2s linear;
+}
+
+.mini-player__main {
+  display: flex;
+  align-items: center;
+  overflow: hidden;
+  min-width: 0;
+  flex: 1 1 auto;
+  padding: 14rpx 6rpx 14rpx 16rpx;
+}
+
+.mini-player__cover {
+  width: 78rpx;
+  height: 78rpx;
+  flex: 0 0 auto;
+  overflow: hidden;
+  border-radius: 15rpx;
+}
+
+.mini-player__meta {
+  display: flex;
+  min-width: 0;
+  flex: 1 1 auto;
+  flex-direction: column;
+  margin-left: 18rpx;
+}
+
+.mini-player__actions {
+  display: flex;
+  align-items: center;
+  flex: 0 0 auto;
+  gap: 4rpx;
+  padding-right: 10rpx;
+}
+
+.mini-player__title,
+.mini-player__artist {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mini-player__title {
+  color: #26382f;
+  font-size: 27rpx;
+  font-weight: 600;
+}
+
+.mini-player__artist {
+  margin-top: 6rpx;
+  color: #829087;
+  font-size: 21rpx;
+}
+
+.mini-player__action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 62rpx;
+  height: 62rpx;
+  box-sizing: border-box;
+  flex: 0 0 62rpx;
+  border-radius: 50%;
+  color: #365447;
+  background: transparent;
+  font-size: 27rpx;
+  font-weight: 650;
+  line-height: 1;
+}

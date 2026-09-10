@@ -1,0 +1,6 @@
+{
+  "component": true,
+  "usingComponents": {
+    "media-artwork": "/components/media-artwork/index"
+  }
+}

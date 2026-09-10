@@ -1,0 +1,42 @@
+<view wx:if="{{currentTrack}}" class="mini-player">
+  <view class="mini-player__progress">
+    <view class="mini-player__progress-value" style="width: {{progress}}%;" />
+  </view>
+  <view
+    class="mini-player__main"
+    aria-role="button"
+    aria-label="打开 {{currentTrack.title}} 播放页"
+    bindtap="handleOpenPlayer"
+  >
+    <view class="mini-player__cover">
+      <media-artwork src="{{currentTrack.coverUrl || ''}}" label="音" />
+    </view>
+    <view class="mini-player__meta">
+      <text class="mini-player__title">{{currentTrack.title}}</text>
+      <text class="mini-player__artist">{{currentTrack.artist.name}}</text>
+    </view>
+  </view>
+  <view class="mini-player__actions">
+    <view
+      class="mini-player__action"
+      aria-role="button"
+      aria-label="{{status === 'playing' ? '暂停' : status === 'loading' ? '加载中' : '播放'}}"
+      catchtap="handleTogglePlayback"
+    >
+      {{status === 'playing' ? 'Ⅱ' : status === 'loading' ? '···' : '▶'}}
+    </view>
+    <view class="mini-player__action" aria-role="button" aria-label="下一首" catchtap="handleNext">
+      ›|
+    </view>
+    <view
+      class="mini-player__action"
+      aria-role="button"
+      aria-label="打开播放列表"
+      catchtap="handleOpenQueue"
+    >
+      ≡
+    </view>
+  </view>
+</view>
+
+<play-queue visible="{{queueVisible}}" bindclose="handleCloseQueue" />

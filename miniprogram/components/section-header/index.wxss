@@ -1,0 +1,24 @@
+.section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20rpx;
+}
+
+.section-header__title {
+  color: #23342d;
+  font-size: 34rpx;
+  font-weight: 650;
+}
+
+.section-header__link {
+  display: flex;
+  align-items: center;
+  color: #6d7e75;
+  font-size: 24rpx;
+}
+
+.section-header__arrow {
+  margin-left: 8rpx;
+  font-size: 32rpx;
+}

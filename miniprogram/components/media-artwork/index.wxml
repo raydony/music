@@ -1,0 +1,12 @@
+<view class="artwork {{circle ? 'artwork--circle' : ''}}">
+  <image
+    wx:if="{{src && !failed}}"
+    class="artwork__image"
+    src="{{src}}"
+    mode="aspectFill"
+    binderror="onImageError"
+  />
+  <view wx:else class="artwork__fallback">
+    <text>{{label || '音'}}</text>
+  </view>
+</view>

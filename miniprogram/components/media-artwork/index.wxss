@@ -1,0 +1,36 @@
+:host {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.artwork,
+.artwork__image,
+.artwork__fallback {
+  width: 100%;
+  height: 100%;
+}
+
+.artwork {
+  overflow: hidden;
+  background: #e5e9e3;
+  border-radius: inherit;
+}
+
+.artwork--circle {
+  border-radius: 50%;
+}
+
+.artwork__image {
+  display: block;
+}
+
+.artwork__fallback {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #6f7f76;
+  background: linear-gradient(145deg, #edf0eb, #dce4dd);
+  font-size: 30rpx;
+  font-weight: 600;
+}
