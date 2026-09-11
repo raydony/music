@@ -12,6 +12,7 @@ import {
 interface DisplayLyricLine {
   key: string;
   text: string;
+  time?: number;
 }
 
 interface PlayerPageRuntime {
@@ -20,7 +21,13 @@ interface PlayerPageRuntime {
   lyricsSignature: string;
   requestingTrackId: string;
   isSeeking: boolean;
+  isUserBrowsingLyrics: boolean;
+  lastAutoScrolledLyricIndex: number;
+  lyricResumeTimer: ReturnType<typeof setTimeout> | null;
+  ignoreScrollEventsUntil: number;
 }
+
+const LYRIC_RESUME_DELAY_MS = 10_000;
 
 const runtimeByPage = new WeakMap<object, PlayerPageRuntime>();
 
@@ -35,6 +42,10 @@ function getRuntime(page: object): PlayerPageRuntime {
     lyricsSignature: '',
     requestingTrackId: '',
     isSeeking: false,
+    isUserBrowsingLyrics: false,
+    lastAutoScrolledLyricIndex: -1,
+    lyricResumeTimer: null,
+    ignoreScrollEventsUntil: 0,
   };
   runtimeByPage.set(page, runtime);
   return runtime;
@@ -61,8 +72,9 @@ Page({
     queueVisible: false,
     lyrics: [] as DisplayLyricLine[],
     activeLyricIndex: -1,
-    lyricAnchor: '',
+    lyricScrollTop: 0,
     hasSynchronizedLyrics: false,
+    isUserBrowsingLyrics: false,
   },
 
   onLoad() {
@@ -71,7 +83,11 @@ Page({
   },
 
   onUnload() {
-    getRuntime(this).unsubscribe?.();
+    const runtime = getRuntime(this);
+    if (runtime.lyricResumeTimer !== null) {
+      clearTimeout(runtime.lyricResumeTimer);
+    }
+    runtime.unsubscribe?.();
     runtimeByPage.delete(this);
   },
 
@@ -82,10 +98,11 @@ Page({
     if (track) {
       const signature = `${track.id}\n${track.lyricsLrc ?? ''}\n${track.lyrics ?? ''}`;
       if (signature !== runtime.lyricsSignature) {
+        this.resetLyricInteraction();
         runtime.lyricsSignature = signature;
         runtime.synchronizedLyrics = parseLrc(track.lyricsLrc);
         const lyrics = runtime.synchronizedLyrics.length
-          ? runtime.synchronizedLyrics.map(({ key, text }) => ({ key, text }))
+          ? runtime.synchronizedLyrics.map(({ key, text, time }) => ({ key, text, time }))
           : getLyricsLines(track.lyrics, null).map((text, index) => ({
               key: `plain-${index}`,
               text,
@@ -94,21 +111,28 @@ Page({
           lyrics,
           hasSynchronizedLyrics: runtime.synchronizedLyrics.length > 0,
           activeLyricIndex: -1,
-          lyricAnchor: '',
+          lyricScrollTop: 0,
+          isUserBrowsingLyrics: false,
         });
       }
       void this.ensureTrackDetails(track);
     } else if (runtime.lyricsSignature) {
+      this.resetLyricInteraction();
       runtime.lyricsSignature = '';
       runtime.synchronizedLyrics = [];
-      this.setData({ lyrics: [], activeLyricIndex: -1, lyricAnchor: '' });
+      this.setData({
+        lyrics: [],
+        activeLyricIndex: -1,
+        lyricScrollTop: 0,
+        isUserBrowsingLyrics: false,
+      });
     }
 
     const activeLyricIndex = runtime.synchronizedLyrics.length
       ? findActiveLyricIndex(runtime.synchronizedLyrics, state.currentTime)
       : -1;
     const lyricChanged = activeLyricIndex !== this.data.activeLyricIndex;
-    this.setData({
+    const playerStatePatch = {
       currentTrack: track,
       status: state.status,
       currentTime: state.currentTime,
@@ -120,10 +144,167 @@ Page({
       playModeLabel: MODE_LABELS[state.playMode],
       queuePosition:
         state.currentIndex >= 0 ? `${state.currentIndex + 1} / ${state.queue.length}` : '1 / 1',
-      activeLyricIndex,
-      lyricAnchor:
-        lyricChanged && activeLyricIndex >= 0 ? `lyric-${activeLyricIndex}` : this.data.lyricAnchor,
+    };
+
+    if (!lyricChanged) {
+      this.setData(playerStatePatch);
+      return;
+    }
+
+    this.setData({ ...playerStatePatch, activeLyricIndex }, () => {
+      if (!runtime.isUserBrowsingLyrics) {
+        this.scrollToActiveLyric();
+      }
     });
+  },
+
+  scrollToActiveLyric(force = false) {
+    const runtime = getRuntime(this);
+    const activeLyricIndex = this.data.activeLyricIndex;
+    if (activeLyricIndex < 0 || runtime.isUserBrowsingLyrics) {
+      return;
+    }
+    if (!force && runtime.lastAutoScrolledLyricIndex === activeLyricIndex) {
+      return;
+    }
+
+    let scrollViewRect: WechatMiniprogram.BoundingClientRectCallbackResult | null = null;
+    let activeLyricRect: WechatMiniprogram.BoundingClientRectCallbackResult | null = null;
+    let scrollOffset: WechatMiniprogram.ScrollOffsetCallbackResult | null = null;
+
+    wx.createSelectorQuery()
+      .select('.lyrics-view')
+      .boundingClientRect((result) => {
+        scrollViewRect = result;
+      })
+      .select(`#lyric-${activeLyricIndex}`)
+      .boundingClientRect((result) => {
+        activeLyricRect = result;
+      })
+      .select('.lyrics-view')
+      .scrollOffset((result) => {
+        scrollOffset = result;
+      })
+      .exec(() => {
+        const viewRect =
+          scrollViewRect as WechatMiniprogram.BoundingClientRectCallbackResult | null;
+        const lyricRect =
+          activeLyricRect as WechatMiniprogram.BoundingClientRectCallbackResult | null;
+        const offset = scrollOffset as WechatMiniprogram.ScrollOffsetCallbackResult | null;
+        if (
+          !viewRect ||
+          !lyricRect ||
+          !offset ||
+          !runtimeByPage.has(this) ||
+          runtime.isUserBrowsingLyrics ||
+          this.data.activeLyricIndex !== activeLyricIndex
+        ) {
+          return;
+        }
+
+        const centeredScrollTop =
+          offset.scrollTop +
+          lyricRect.top -
+          viewRect.top -
+          viewRect.height / 2 +
+          lyricRect.height / 2;
+        const maximumScrollTop = Math.max(0, offset.scrollHeight - viewRect.height);
+        const lyricScrollTop =
+          activeLyricIndex === 0 ? 0 : Math.min(maximumScrollTop, Math.max(0, centeredScrollTop));
+
+        runtime.lastAutoScrolledLyricIndex = activeLyricIndex;
+        runtime.ignoreScrollEventsUntil = Date.now() + 800;
+        this.setData({ lyricScrollTop });
+      });
+  },
+
+  clearLyricResumeTimer() {
+    const runtime = getRuntime(this);
+    if (runtime.lyricResumeTimer !== null) {
+      clearTimeout(runtime.lyricResumeTimer);
+      runtime.lyricResumeTimer = null;
+    }
+  },
+
+  resetLyricInteraction() {
+    const runtime = getRuntime(this);
+    this.clearLyricResumeTimer();
+    runtime.isUserBrowsingLyrics = false;
+    runtime.lastAutoScrolledLyricIndex = -1;
+    runtime.ignoreScrollEventsUntil = 0;
+  },
+
+  scheduleLyricAutoFollow() {
+    const runtime = getRuntime(this);
+    this.clearLyricResumeTimer();
+    runtime.lyricResumeTimer = setTimeout(() => {
+      runtime.lyricResumeTimer = null;
+      if (!runtimeByPage.has(this)) {
+        return;
+      }
+      runtime.isUserBrowsingLyrics = false;
+      this.setData({ isUserBrowsingLyrics: false }, () => {
+        this.scrollToActiveLyric(true);
+      });
+    }, LYRIC_RESUME_DELAY_MS);
+  },
+
+  enterLyricBrowsingMode() {
+    const runtime = getRuntime(this);
+    if (!runtime.synchronizedLyrics.length) {
+      return;
+    }
+    runtime.isUserBrowsingLyrics = true;
+    if (!this.data.isUserBrowsingLyrics) {
+      this.setData({ isUserBrowsingLyrics: true });
+    }
+    this.scheduleLyricAutoFollow();
+  },
+
+  handleLyricTouchStart() {
+    this.enterLyricBrowsingMode();
+  },
+
+  handleLyricTouchEnd() {
+    if (getRuntime(this).isUserBrowsingLyrics) {
+      this.scheduleLyricAutoFollow();
+    }
+  },
+
+  handleLyricScroll() {
+    const runtime = getRuntime(this);
+    if (Date.now() <= runtime.ignoreScrollEventsUntil) {
+      return;
+    }
+    if (!runtime.isUserBrowsingLyrics) {
+      this.enterLyricBrowsingMode();
+      return;
+    }
+    this.scheduleLyricAutoFollow();
+  },
+
+  handleLyricTap(event: WechatMiniprogram.TouchEvent) {
+    const runtime = getRuntime(this);
+    const index = Number(event.currentTarget.dataset.index);
+    if (!Number.isInteger(index) || index < 0) {
+      return;
+    }
+    const lyric = runtime.synchronizedLyrics[index];
+    if (!lyric || !Number.isFinite(lyric.time)) {
+      return;
+    }
+
+    this.clearLyricResumeTimer();
+    runtime.isUserBrowsingLyrics = false;
+    runtime.lastAutoScrolledLyricIndex = -1;
+    this.setData(
+      {
+        activeLyricIndex: index,
+        isUserBrowsingLyrics: false,
+      },
+      () => this.scrollToActiveLyric(true),
+    );
+    playerManager.seek(lyric.time);
   },
 
   async ensureTrackDetails(track: PlayableTrack) {

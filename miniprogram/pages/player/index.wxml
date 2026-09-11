@@ -23,14 +23,21 @@
       class="lyrics-view"
       scroll-y
       scroll-with-animation
-      scroll-into-view="{{lyricAnchor}}"
+      scroll-top="{{lyricScrollTop}}"
       enhanced
+      show-scrollbar="{{false}}"
+      bindtouchstart="handleLyricTouchStart"
+      bindtouchend="handleLyricTouchEnd"
+      bindscroll="handleLyricScroll"
     >
       <view wx:if="{{lyrics.length}}" class="lyrics-list">
         <text
           wx:for="{{lyrics}}"
           wx:key="key"
           id="lyric-{{index}}"
+          data-index="{{index}}"
+          data-time="{{item.time}}"
+          bindtap="handleLyricTap"
           class="lyrics-line {{hasSynchronizedLyrics && index === activeLyricIndex ? 'lyrics-line--active' : ''}}"
         >
           {{item.text}}

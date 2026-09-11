@@ -50,14 +50,16 @@
 }
 
 .lyrics-view {
-  height: 330rpx;
-  margin-top: 34rpx;
+  height: 38vh;
+  min-height: 440rpx;
+  max-height: 600rpx;
+  margin-top: 24rpx;
   border-radius: 26rpx;
   background: rgba(255, 255, 255, 0.52);
 }
 
 .lyrics-list {
-  padding: 136rpx 28rpx;
+  padding: 220rpx 28rpx;
 }
 
 .lyrics-line {
@@ -89,7 +91,7 @@
 }
 
 .progress-area {
-  margin-top: 28rpx;
+  margin-top: 22rpx;
 }
 
 .progress-area slider {
