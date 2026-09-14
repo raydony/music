@@ -10,6 +10,8 @@ const errorMessages: Record<string, string> = {
   ARTIST_NOT_FOUND: '艺术家不存在或已被删除',
   CATEGORY_NOT_FOUND: '分类不存在或已被删除',
   NETWORK_ERROR: '无法连接服务器，请检查服务是否已启动',
+  INVALID_CREDENTIALS: '用户名或密码错误',
+  UNAUTHORIZED: '登录状态已失效，请重新登录',
 };
 
 export function getErrorMessage(error: unknown): string {

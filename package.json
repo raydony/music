@@ -24,7 +24,8 @@
     "db:migrate": "pnpm --filter server db:migrate",
     "db:seed": "pnpm --filter server db:seed",
     "db:verify": "pnpm --filter server db:verify",
-    "db:studio": "pnpm --filter server db:studio"
+    "db:studio": "pnpm --filter server db:studio",
+    "admin:create": "pnpm --filter server admin:create"
   },
   "devDependencies": {
     "prettier": "^3.8.2"

@@ -92,7 +92,7 @@ pnpm dev:server
 
 管理 API 位于 `/api/admin`，为 Artist、Album、Category、Track 提供列表、详情、创建、更新和删除接口。
 
-> 安全警告：Admin API 当前没有登录和身份认证，只能用于本地开发，禁止直接暴露到公网生产环境。
+除 `POST /api/admin/auth/login` 外，所有 `/api/admin/*` 接口均要求 JWT Bearer Token。公共曲库 API 保持匿名可访问。Swagger 的 `Authorize` 按钮可填写登录接口返回的 access token。
 
 除分类公共列表外，列表接口支持 `page` 和 `pageSize`；默认值为 `1` 和 `20`，`pageSize` 最大为 `100`。成功响应统一使用 `{ "success": true, "data": ... }`，分页响应还包含 `meta`；错误响应统一包含 `error.code`、`error.message`、`timestamp` 和 `path`。
 
@@ -116,6 +116,21 @@ pnpm db:seed
 pnpm db:verify
 ```
 
+数据库 migration 完成后，在 `server/.env` 中配置首个管理员（密码至少 12 位）：
+
+```env
+ADMIN_INITIAL_USERNAME=admin
+ADMIN_INITIAL_PASSWORD=replace_with_a_strong_password
+```
+
+然后运行：
+
+```bash
+pnpm admin:create
+```
+
+脚本只创建新管理员，用户名已存在时会退出且不会覆盖密码。创建完成后建议从 `server/.env` 删除 `ADMIN_INITIAL_PASSWORD`，后续登录密码不会保存在浏览器代码或数据库明文字段中。
+
 详细说明见 `docs/development.md`。Seed 中的音频和封面 URL 只是占位地址，不能实际播放。
 
 ## 启动管理后台
@@ -133,7 +148,7 @@ pnpm dev:admin
 
 管理后台当前包含：首页数据概览、曲目管理、专辑管理、艺术家管理和分类管理。各资源支持分页列表、新增、编辑和删除；媒体字段当前只填写 URL，不上传或转发文件。
 
-> 安全警告：管理后台及 Admin API 尚未接入登录和权限控制，只能在本地开发或受控网络中使用。
+访问管理页面会先跳转 `/login`。登录成功后 access token 保存在浏览器 `localStorage` 的 `fanyinji_admin_token` 中；请求层只对 `/admin/*` 请求统一附加 Bearer Token。Token 无效或过期时会自动清理并返回登录页。
 
 ## 打开微信小程序
 

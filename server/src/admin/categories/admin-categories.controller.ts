@@ -19,6 +19,7 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import { AdminProtected } from '../../admin-auth/decorators/admin-protected.decorator.js';
 import {
   ErrorResponseDto,
   PaginatedResponseDto,
@@ -30,6 +31,7 @@ import { CreateCategoryDto } from './dto/create-category.dto.js';
 import { UpdateCategoryDto } from './dto/update-category.dto.js';
 
 @ApiTags('Admin Categories')
+@AdminProtected()
 @Controller('admin/categories')
 export class AdminCategoriesController {
   constructor(private readonly service: AdminCategoriesService) {}
@@ -51,7 +53,7 @@ export class AdminCategoriesController {
   }
 
   @Post()
-  @ApiOperation({ summary: '创建分类（开发接口，暂无鉴权）' })
+  @ApiOperation({ summary: '创建分类' })
   @ApiCreatedResponse({ type: SuccessResponseDto })
   @ApiBadRequestResponse({ type: ErrorResponseDto })
   @ApiConflictResponse({ type: ErrorResponseDto })
@@ -60,7 +62,7 @@ export class AdminCategoriesController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: '更新分类（开发接口，暂无鉴权）' })
+  @ApiOperation({ summary: '更新分类' })
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiOkResponse({ type: SuccessResponseDto })
   @ApiConflictResponse({ type: ErrorResponseDto })
@@ -72,7 +74,7 @@ export class AdminCategoriesController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: '删除分类（开发接口，暂无鉴权）' })
+  @ApiOperation({ summary: '删除分类' })
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiOkResponse({ type: SuccessResponseDto })
   @ApiNotFoundResponse({ type: ErrorResponseDto })

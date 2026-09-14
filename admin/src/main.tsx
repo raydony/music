@@ -4,6 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { App as AntdApp, ConfigProvider } from 'antd';
 import './index.css';
 import App from './App.tsx';
+import { AuthProvider } from './auth/AuthProvider';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -18,7 +19,9 @@ createRoot(document.getElementById('root')!).render(
     >
       <AntdApp>
         <BrowserRouter>
-          <App />
+          <AuthProvider>
+            <App />
+          </AuthProvider>
         </BrowserRouter>
       </AntdApp>
     </ConfigProvider>

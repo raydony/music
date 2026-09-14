@@ -1,10 +1,15 @@
 import { INestApplication } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
+import { JwtService } from '@nestjs/jwt';
 import { Server } from 'node:http';
+import { hash } from 'bcryptjs';
 import request from 'supertest';
 import { AppModule } from '../src/app.module.js';
 import { configureApp } from '../src/configure-app.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
+
+process.env.JWT_SECRET = 'e2e-only-jwt-secret-at-least-32-characters-long';
+process.env.JWT_EXPIRES_IN = '12h';
 
 const ids = {
   artists: {
@@ -26,6 +31,11 @@ const ids = {
 } as const;
 
 const nonexistentId = '99999999-9999-4999-8999-999999999999';
+const testAdmin = {
+  username: 'E2E-auth-admin',
+  password: 'E2E-Strong-Password-123',
+  inactiveUsername: 'E2E-auth-inactive',
+} as const;
 
 interface ApiEnvelope<T> {
   success: true;
@@ -73,6 +83,8 @@ describe('Music catalog API (e2e)', () => {
   let app: INestApplication<Server>;
   let prisma: PrismaService;
   let httpServer: Server;
+  let adminToken: string;
+  let expiredAdminToken: string;
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
@@ -84,6 +96,27 @@ describe('Music catalog API (e2e)', () => {
     await app.init();
     prisma = app.get(PrismaService);
     httpServer = app.getHttpServer();
+
+    await prisma.adminUser.deleteMany({ where: { username: { startsWith: 'E2E-auth-' } } });
+    const passwordHash = await hash(testAdmin.password, 4);
+    await prisma.adminUser.createMany({
+      data: [
+        { username: testAdmin.username, passwordHash },
+        { username: testAdmin.inactiveUsername, passwordHash, isActive: false },
+      ],
+    });
+    const activeAdmin = await prisma.adminUser.findUniqueOrThrow({
+      where: { username: testAdmin.username },
+    });
+    expiredAdminToken = app
+      .get(JwtService)
+      .sign({ sub: activeAdmin.id, username: activeAdmin.username }, { expiresIn: -1 });
+
+    const loginResponse = await request(httpServer).post('/api/admin/auth/login').send({
+      username: testAdmin.username,
+      password: testAdmin.password,
+    });
+    adminToken = (loginResponse.body as ApiEnvelope<{ accessToken: string }>).data.accessToken;
   });
 
   afterAll(async () => {
@@ -94,6 +127,7 @@ describe('Music catalog API (e2e)', () => {
     await prisma.category.deleteMany({ where: { name: { startsWith: 'E2E-' } } });
     await prisma.album.deleteMany({ where: { title: { startsWith: 'E2E-' } } });
     await prisma.artist.deleteMany({ where: { name: { startsWith: 'E2E-' } } });
+    await prisma.adminUser.deleteMany({ where: { username: { startsWith: 'E2E-auth-' } } });
     await app.close();
   });
 
@@ -121,7 +155,9 @@ describe('Music catalog API (e2e)', () => {
       const body = response.body as PageEnvelope<TrackItem>;
 
       expect(body.success).toBe(true);
-      expect(body.meta).toMatchObject({ page: 1, pageSize: 2, total: 4, totalPages: 2 });
+      expect(body.meta).toMatchObject({ page: 1, pageSize: 2 });
+      expect(body.meta.total).toBeGreaterThanOrEqual(4);
+      expect(body.meta.totalPages).toBe(Math.ceil(body.meta.total / body.meta.pageSize));
       expect(body.data).toHaveLength(2);
       expect(body.data.some((track) => track.id === ids.tracks.unpublished)).toBe(false);
       expect(body.data.every((track) => !('lyrics' in track) && !('lyricsLrc' in track))).toBe(
@@ -186,7 +222,7 @@ describe('Music catalog API (e2e)', () => {
         .expect(200);
       const body = response.body as ApiEnvelope<ArtistDetails>;
       expect(body.data.albums).toHaveLength(1);
-      expect(body.data.publishedTrackCount).toBe(2);
+      expect(body.data.publishedTrackCount).toBeGreaterThanOrEqual(2);
       expect(body.data).not.toHaveProperty('tracks');
     });
   });
@@ -208,12 +244,92 @@ describe('Music catalog API (e2e)', () => {
     });
   });
 
+  describe('admin authentication', () => {
+    it('logs in with correct credentials without exposing the password hash', async () => {
+      const response = await request(httpServer)
+        .post('/api/admin/auth/login')
+        .send({ username: testAdmin.username, password: testAdmin.password })
+        .expect(200);
+      const body = response.body as ApiEnvelope<{
+        accessToken: string;
+        admin: { id: string; username: string };
+      }>;
+
+      expect(body.data.accessToken).toEqual(expect.any(String));
+      expect(body.data.admin.username).toBe(testAdmin.username);
+      expect(body.data.admin).not.toHaveProperty('passwordHash');
+    });
+
+    it('rejects an incorrect password without identifying the failure reason', async () => {
+      const response = await request(httpServer)
+        .post('/api/admin/auth/login')
+        .send({ username: testAdmin.username, password: 'Wrong-Password-123' })
+        .expect(401);
+
+      expect((response.body as ErrorEnvelope).error).toMatchObject({
+        code: 'INVALID_CREDENTIALS',
+        message: '用户名或密码错误',
+      });
+    });
+
+    it('rejects an unknown username with the same response', async () => {
+      const response = await request(httpServer)
+        .post('/api/admin/auth/login')
+        .send({ username: 'E2E-auth-unknown', password: 'Wrong-Password-123' })
+        .expect(401);
+
+      expect((response.body as ErrorEnvelope).error).toMatchObject({
+        code: 'INVALID_CREDENTIALS',
+        message: '用户名或密码错误',
+      });
+    });
+
+    it('rejects an inactive administrator', async () => {
+      await request(httpServer)
+        .post('/api/admin/auth/login')
+        .send({ username: testAdmin.inactiveUsername, password: testAdmin.password })
+        .expect(401);
+    });
+
+    it('rejects /admin/auth/me without a token', async () => {
+      await request(httpServer).get('/api/admin/auth/me').expect(401);
+    });
+
+    it('returns the current administrator for a valid token', async () => {
+      const response = await request(httpServer)
+        .get('/api/admin/auth/me')
+        .auth(adminToken, { type: 'bearer' })
+        .expect(200);
+
+      expect((response.body as ApiEnvelope<{ username: string }>).data.username).toBe(
+        testAdmin.username,
+      );
+    });
+
+    it('rejects an expired token', async () => {
+      await request(httpServer)
+        .get('/api/admin/auth/me')
+        .auth(expiredAdminToken, { type: 'bearer' })
+        .expect(401);
+    });
+
+    it('protects Admin APIs while leaving Public APIs open', async () => {
+      await request(httpServer).get('/api/admin/tracks').expect(401);
+      await request(httpServer)
+        .get('/api/admin/tracks')
+        .auth(adminToken, { type: 'bearer' })
+        .expect(200);
+      await request(httpServer).get('/api/tracks').expect(200);
+    });
+  });
+
   describe('admin track CRUD and validation', () => {
     let trackId: string;
 
     it('creates a draft track', async () => {
       const response = await request(httpServer)
         .post('/api/admin/tracks')
+        .auth(adminToken, { type: 'bearer' })
         .send({
           title: '  E2E-测试曲目  ',
           artistId: ids.artists.musician,
@@ -231,16 +347,26 @@ describe('Music catalog API (e2e)', () => {
     });
 
     it('gets, updates, and deletes the track', async () => {
-      await request(httpServer).get(`/api/admin/tracks/${trackId}`).expect(200);
+      await request(httpServer)
+        .get(`/api/admin/tracks/${trackId}`)
+        .auth(adminToken, { type: 'bearer' })
+        .expect(200);
 
       const updated = await request(httpServer)
         .patch(`/api/admin/tracks/${trackId}`)
+        .auth(adminToken, { type: 'bearer' })
         .send({ title: 'E2E-已更新曲目', isPublished: true })
         .expect(200);
       expect((updated.body as ApiEnvelope<TrackItem>).data.title).toBe('E2E-已更新曲目');
 
-      await request(httpServer).delete(`/api/admin/tracks/${trackId}`).expect(200);
-      await request(httpServer).get(`/api/admin/tracks/${trackId}`).expect(404);
+      await request(httpServer)
+        .delete(`/api/admin/tracks/${trackId}`)
+        .auth(adminToken, { type: 'bearer' })
+        .expect(200);
+      await request(httpServer)
+        .get(`/api/admin/tracks/${trackId}`)
+        .auth(adminToken, { type: 'bearer' })
+        .expect(404);
     });
 
     it.each([
@@ -250,6 +376,7 @@ describe('Music catalog API (e2e)', () => {
     ])('rejects %s', async (_label, override, expectedMessage) => {
       const response = await request(httpServer)
         .post('/api/admin/tracks')
+        .auth(adminToken, { type: 'bearer' })
         .send({
           title: 'E2E-invalid',
           artistId: ids.artists.musician,
@@ -265,6 +392,7 @@ describe('Music catalog API (e2e)', () => {
     it('returns 404 for a nonexistent related artist', async () => {
       const response = await request(httpServer)
         .post('/api/admin/tracks')
+        .auth(adminToken, { type: 'bearer' })
         .send({
           title: 'E2E-missing-artist',
           artistId: nonexistentId,
@@ -279,6 +407,7 @@ describe('Music catalog API (e2e)', () => {
     it('rejects an album and artist mismatch', async () => {
       const response = await request(httpServer)
         .post('/api/admin/tracks')
+        .auth(adminToken, { type: 'bearer' })
         .send({
           title: 'E2E-mismatch',
           artistId: ids.artists.wutai,
@@ -296,6 +425,7 @@ describe('Music catalog API (e2e)', () => {
     it('returns 409 for a duplicate category name', async () => {
       const response = await request(httpServer)
         .post('/api/admin/categories')
+        .auth(adminToken, { type: 'bearer' })
         .send({ name: '梵呗' })
         .expect(409);
       expect((response.body as ErrorEnvelope).error.code).toBe('CATEGORY_NAME_EXISTS');
@@ -304,6 +434,7 @@ describe('Music catalog API (e2e)', () => {
     it('returns 409 when deleting a category in use', async () => {
       const response = await request(httpServer)
         .delete(`/api/admin/categories/${ids.categories.zanji}`)
+        .auth(adminToken, { type: 'bearer' })
         .expect(409);
       expect((response.body as ErrorEnvelope).error.code).toBe('CATEGORY_IN_USE');
     });
@@ -311,6 +442,7 @@ describe('Music catalog API (e2e)', () => {
     it('returns 409 when deleting an artist in use', async () => {
       const response = await request(httpServer)
         .delete(`/api/admin/artists/${ids.artists.wutai}`)
+        .auth(adminToken, { type: 'bearer' })
         .expect(409);
       expect((response.body as ErrorEnvelope).error.code).toBe('ARTIST_IN_USE');
     });

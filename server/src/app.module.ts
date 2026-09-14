@@ -4,6 +4,7 @@ import { AppController } from './app.controller.js';
 import { AppService } from './app.service.js';
 import { PrismaModule } from './prisma/prisma.module.js';
 import { AdminModule } from './admin/admin.module.js';
+import { AdminAuthModule } from './admin-auth/admin-auth.module.js';
 import { AlbumsModule } from './albums/albums.module.js';
 import { ArtistsModule } from './artists/artists.module.js';
 import { CategoriesModule } from './categories/categories.module.js';
@@ -17,6 +18,7 @@ import { TracksModule } from './tracks/tracks.module.js';
     AlbumsModule,
     ArtistsModule,
     CategoriesModule,
+    AdminAuthModule,
     AdminModule,
   ],
   controllers: [AppController],

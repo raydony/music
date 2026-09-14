@@ -12,7 +12,7 @@ cp server/.env.example server/.env
 cp admin/.env.example admin/.env.local
 ```
 
-请修改示例密码，并确保根目录和 Server 的数据库名称、用户名、密码及端口保持一致。
+请修改示例密码和 `JWT_SECRET`，并确保根目录和 Server 的数据库名称、用户名、密码及端口保持一致。`JWT_SECRET` 必须为至少 32 位的随机值，且不能继续使用示例占位值；`JWT_EXPIRES_IN` 默认是 `12h`。
 
 ## 启动 PostgreSQL
 
@@ -70,7 +70,24 @@ Public API 位于 `/api/tracks`、`/api/albums`、`/api/artists` 和 `/api/categ
 
 Admin API 位于 `/api/admin/*`，可管理 Artist、Album、Category 和 Track。
 
-> Admin API 当前仅为开发阶段接口，尚未配置身份认证，禁止直接部署到公网生产环境。
+`POST /api/admin/auth/login` 是唯一匿名 Admin 路由。`GET /api/admin/auth/me` 和 Artist、Album、Category、Track 的全部 Admin CRUD 路由都要求 `Authorization: Bearer <token>`。Public API 不经过 Admin JWT Guard。
+
+### 创建首个管理员
+
+执行 migration 后，在 Git 忽略的 `server/.env` 中临时配置：
+
+```env
+ADMIN_INITIAL_USERNAME=admin
+ADMIN_INITIAL_PASSWORD=replace_with_a_strong_password
+```
+
+密码必须为 12～128 位。运行：
+
+```bash
+pnpm admin:create
+```
+
+脚本使用 bcrypt cost 12 保存哈希，不输出 `passwordHash`，也不会覆盖同名管理员。创建完成后建议清空或删除 `ADMIN_INITIAL_PASSWORD`。
 
 ### 分页与响应
 
@@ -113,21 +130,29 @@ curl 'http://localhost:3000/api/tracks?page=1&pageSize=20'
 curl http://localhost:3000/api/albums
 curl http://localhost:3000/api/artists
 curl http://localhost:3000/api/categories
-curl http://localhost:3000/api/admin/tracks
+curl -X POST http://localhost:3000/api/admin/auth/login \
+  -H 'Content-Type: application/json' \
+  -d '{"username":"admin","password":"YOUR_PASSWORD"}'
+
+curl http://localhost:3000/api/admin/tracks \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN'
 ```
 
 Admin 创建、更新、删除示例：
 
 ```bash
 curl -X POST http://localhost:3000/api/admin/categories \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN' \
   -H 'Content-Type: application/json' \
   -d '{"name":"本地联调分类"}'
 
 curl -X PATCH http://localhost:3000/api/admin/categories/CATEGORY_UUID \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN' \
   -H 'Content-Type: application/json' \
   -d '{"description":"本地联调"}'
 
-curl -X DELETE http://localhost:3000/api/admin/categories/CATEGORY_UUID
+curl -X DELETE http://localhost:3000/api/admin/categories/CATEGORY_UUID \
+  -H 'Authorization: Bearer YOUR_ACCESS_TOKEN'
 ```
 
 运行数据库 E2E（需要 PostgreSQL 已启动且 seed 已执行）：
@@ -147,6 +172,7 @@ pnpm dev:admin
 默认访问地址为 `http://localhost:5173`。管理后台路由如下：
 
 - `/`：数据概览与快捷入口
+- `/login`：管理员登录
 - `/tracks`：曲目管理
 - `/albums`：专辑管理
 - `/artists`：艺术家管理
@@ -154,9 +180,9 @@ pnpm dev:admin
 
 管理后台统一通过 `admin/src/api/client.ts` 调用 REST API。浏览器端变量 `VITE_API_BASE_URL` 默认为 `http://localhost:3000/api`；Server 端 `ADMIN_ORIGIN` 默认为 `http://localhost:5173`。如果前后端端口或域名发生变化，需要同步更新 `admin/.env.local` 和 `server/.env`，然后重启开发服务。
 
-表单会显示前端校验和后端业务错误。曲目表单会根据所选艺术家过滤专辑；切换艺术家时，如果当前专辑不再匹配会自动清空。音频和封面仅保存 URL，文件不会经过 NestJS 转发。
+登录 token 保存在 `localStorage` 的 `fanyinji_admin_token` 中。请求层对 `/admin/*` 自动添加 Authorization header；收到 401 时清除 token 并跳转 `/login`。刷新页面时通过 `/api/admin/auth/me` 验证 token，退出登录只需清理本地 token，本阶段不维护服务端 blacklist。
 
-> 管理后台和 Admin API 当前均没有身份认证，不得直接暴露到公网生产环境。
+表单会显示前端校验和后端业务错误。曲目表单会根据所选艺术家过滤专辑；切换艺术家时，如果当前专辑不再匹配会自动清空。音频和封面仅保存 URL，文件不会经过 NestJS 转发。
 
 ## 微信原生小程序
 

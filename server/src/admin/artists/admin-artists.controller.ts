@@ -19,6 +19,7 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import { AdminProtected } from '../../admin-auth/decorators/admin-protected.decorator.js';
 import {
   ErrorResponseDto,
   PaginatedResponseDto,
@@ -30,6 +31,7 @@ import { CreateArtistDto } from './dto/create-artist.dto.js';
 import { UpdateArtistDto } from './dto/update-artist.dto.js';
 
 @ApiTags('Admin Artists')
+@AdminProtected()
 @Controller('admin/artists')
 export class AdminArtistsController {
   constructor(private readonly service: AdminArtistsService) {}
@@ -51,7 +53,7 @@ export class AdminArtistsController {
   }
 
   @Post()
-  @ApiOperation({ summary: '创建艺术家（开发接口，暂无鉴权）' })
+  @ApiOperation({ summary: '创建艺术家' })
   @ApiCreatedResponse({ type: SuccessResponseDto })
   @ApiBadRequestResponse({ type: ErrorResponseDto })
   create(@Body() dto: CreateArtistDto) {
@@ -59,7 +61,7 @@ export class AdminArtistsController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: '更新艺术家（开发接口，暂无鉴权）' })
+  @ApiOperation({ summary: '更新艺术家' })
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiOkResponse({ type: SuccessResponseDto })
   @ApiBadRequestResponse({ type: ErrorResponseDto })
@@ -72,7 +74,7 @@ export class AdminArtistsController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: '删除艺术家（开发接口，暂无鉴权）' })
+  @ApiOperation({ summary: '删除艺术家' })
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiOkResponse({ type: SuccessResponseDto })
   @ApiNotFoundResponse({ type: ErrorResponseDto })

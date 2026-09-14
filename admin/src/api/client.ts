@@ -1,4 +1,5 @@
 import type { ApiErrorResponse, ApiResponse, PaginatedResponse, PaginationQuery } from './types';
+import { clearToken, getToken } from '../auth/storage';
 
 const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
 
@@ -37,6 +38,10 @@ function isApiErrorResponse(value: unknown): value is ApiErrorResponse {
 
 async function requestEnvelope<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const headers = new Headers(options.headers);
+  const token = path.startsWith('/admin/') ? getToken() : null;
+  if (token) {
+    headers.set('Authorization', `Bearer ${token}`);
+  }
   if (options.body !== undefined) {
     headers.set('Content-Type', 'application/json');
   }
@@ -58,6 +63,13 @@ async function requestEnvelope<T>(path: string, options: RequestOptions = {}): P
     payload = await response.json();
   } catch {
     throw new ApiError('INVALID_RESPONSE', '服务器返回了无法识别的响应', response.status);
+  }
+
+  if (response.status === 401) {
+    clearToken();
+    if (window.location.pathname !== '/login') {
+      window.location.replace('/login');
+    }
   }
 
   if (!response.ok || isApiErrorResponse(payload)) {

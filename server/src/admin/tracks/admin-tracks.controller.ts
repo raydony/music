@@ -18,6 +18,7 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import { AdminProtected } from '../../admin-auth/decorators/admin-protected.decorator.js';
 import {
   ErrorResponseDto,
   PaginatedResponseDto,
@@ -29,6 +30,7 @@ import { CreateTrackDto } from './dto/create-track.dto.js';
 import { UpdateTrackDto } from './dto/update-track.dto.js';
 
 @ApiTags('Admin Tracks')
+@AdminProtected()
 @Controller('admin/tracks')
 export class AdminTracksController {
   constructor(private readonly service: AdminTracksService) {}
@@ -50,7 +52,7 @@ export class AdminTracksController {
   }
 
   @Post()
-  @ApiOperation({ summary: '创建曲目（开发接口，暂无鉴权）' })
+  @ApiOperation({ summary: '创建曲目' })
   @ApiCreatedResponse({ type: SuccessResponseDto })
   @ApiBadRequestResponse({ type: ErrorResponseDto })
   create(@Body() dto: CreateTrackDto) {
@@ -58,7 +60,7 @@ export class AdminTracksController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: '更新曲目（开发接口，暂无鉴权）' })
+  @ApiOperation({ summary: '更新曲目' })
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiOkResponse({ type: SuccessResponseDto })
   @ApiBadRequestResponse({ type: ErrorResponseDto })
@@ -71,7 +73,7 @@ export class AdminTracksController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: '物理删除曲目（开发接口，暂无鉴权）' })
+  @ApiOperation({ summary: '物理删除曲目' })
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiOkResponse({ type: SuccessResponseDto })
   @ApiNotFoundResponse({ type: ErrorResponseDto })

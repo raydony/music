@@ -1,5 +1,6 @@
-import { Layout, Menu, Typography } from 'antd';
+import { Button, Layout, Menu, Space, Typography } from 'antd';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../auth/auth-context';
 
 const { Header, Sider, Content } = Layout;
 
@@ -18,9 +19,15 @@ const pageTitles: Record<string, string> = Object.fromEntries(
 export function AdminLayout() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { admin, logout } = useAuth();
   const selectedPath = menuItems.some((item) => item.key === location.pathname)
     ? location.pathname
     : '/';
+
+  const handleLogout = (): void => {
+    logout();
+    navigate('/login', { replace: true });
+  };
 
   return (
     <Layout className="app-shell">
@@ -41,7 +48,12 @@ export function AdminLayout() {
           <Typography.Text strong>
             {pageTitles[selectedPath] ?? '佛教音乐数字资源管理平台'}
           </Typography.Text>
-          <Typography.Text type="secondary">佛教音乐数字资源管理平台</Typography.Text>
+          <Space size="middle">
+            <Typography.Text type="secondary">{admin?.username}</Typography.Text>
+            <Button type="text" onClick={handleLogout}>
+              退出登录
+            </Button>
+          </Space>
         </Header>
         <Content className="content">
           <Outlet />

@@ -19,6 +19,7 @@ import {
   ApiParam,
   ApiTags,
 } from '@nestjs/swagger';
+import { AdminProtected } from '../../admin-auth/decorators/admin-protected.decorator.js';
 import {
   ErrorResponseDto,
   PaginatedResponseDto,
@@ -30,6 +31,7 @@ import { CreateAlbumDto } from './dto/create-album.dto.js';
 import { UpdateAlbumDto } from './dto/update-album.dto.js';
 
 @ApiTags('Admin Albums')
+@AdminProtected()
 @Controller('admin/albums')
 export class AdminAlbumsController {
   constructor(private readonly service: AdminAlbumsService) {}
@@ -51,7 +53,7 @@ export class AdminAlbumsController {
   }
 
   @Post()
-  @ApiOperation({ summary: '创建专辑（开发接口，暂无鉴权）' })
+  @ApiOperation({ summary: '创建专辑' })
   @ApiCreatedResponse({ type: SuccessResponseDto })
   @ApiBadRequestResponse({ type: ErrorResponseDto })
   create(@Body() dto: CreateAlbumDto) {
@@ -59,7 +61,7 @@ export class AdminAlbumsController {
   }
 
   @Patch(':id')
-  @ApiOperation({ summary: '更新专辑（开发接口，暂无鉴权）' })
+  @ApiOperation({ summary: '更新专辑' })
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiOkResponse({ type: SuccessResponseDto })
   @ApiBadRequestResponse({ type: ErrorResponseDto })
@@ -73,7 +75,7 @@ export class AdminAlbumsController {
   }
 
   @Delete(':id')
-  @ApiOperation({ summary: '删除专辑并清空曲目关联（开发接口，暂无鉴权）' })
+  @ApiOperation({ summary: '删除专辑并清空曲目关联' })
   @ApiParam({ name: 'id', format: 'uuid' })
   @ApiOkResponse({ type: SuccessResponseDto })
   @ApiNotFoundResponse({ type: ErrorResponseDto })

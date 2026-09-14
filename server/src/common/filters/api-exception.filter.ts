@@ -108,6 +108,8 @@ export class ApiExceptionFilter implements ExceptionFilter {
         return 'RESOURCE_NOT_FOUND';
       case HttpStatus.CONFLICT:
         return 'CONFLICT';
+      case HttpStatus.UNAUTHORIZED:
+        return 'UNAUTHORIZED';
       default:
         return status >= 500 ? 'INTERNAL_SERVER_ERROR' : 'HTTP_ERROR';
     }

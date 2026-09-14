@@ -15,10 +15,9 @@ async function bootstrap() {
 
   const swaggerConfig = new DocumentBuilder()
     .setTitle('佛教音乐 API')
-    .setDescription(
-      '佛教音乐微信小程序 MVP REST API。/api/admin 接口当前未配置身份认证，仅限本地开发。',
-    )
-    .setVersion('0.2.0')
+    .setDescription('佛教音乐微信小程序 MVP REST API。管理接口需要 JWT Bearer Token。')
+    .setVersion('0.3.0')
+    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' }, 'admin-jwt')
     .build();
   const swaggerDocument = SwaggerModule.createDocument(app, swaggerConfig);
   SwaggerModule.setup('api/docs', app, swaggerDocument);
