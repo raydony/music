@@ -5,7 +5,7 @@
     <button class="player-empty__button" bindtap="goHome">返回首页</button>
   </view>
 
-  <block wx:else>
+  <view wx:else class="player-content">
     <view class="player-artwork">
       <media-artwork src="{{currentTrack.coverUrl || ''}}" label="音" />
     </view>
@@ -19,32 +19,34 @@
       </text>
     </view>
 
-    <scroll-view
-      class="lyrics-view"
-      scroll-y
-      scroll-with-animation
-      scroll-top="{{lyricScrollTop}}"
-      enhanced
-      show-scrollbar="{{false}}"
-      bindtouchstart="handleLyricTouchStart"
-      bindtouchend="handleLyricTouchEnd"
-      bindscroll="handleLyricScroll"
-    >
-      <view wx:if="{{lyrics.length}}" class="lyrics-list">
-        <text
-          wx:for="{{lyrics}}"
-          wx:key="key"
-          id="lyric-{{index}}"
-          data-index="{{index}}"
-          data-time="{{item.time}}"
-          bindtap="handleLyricTap"
-          class="lyrics-line {{hasSynchronizedLyrics && index === activeLyricIndex ? 'lyrics-line--active' : ''}}"
-        >
-          {{item.text}}
-        </text>
-      </view>
-      <view wx:else class="lyrics-empty">暂无唱词</view>
-    </scroll-view>
+    <view class="lyrics-section">
+      <scroll-view
+        class="lyrics-view"
+        scroll-y
+        scroll-with-animation
+        scroll-top="{{lyricScrollTop}}"
+        enhanced
+        show-scrollbar="{{false}}"
+        bindtouchstart="handleLyricTouchStart"
+        bindtouchend="handleLyricTouchEnd"
+        bindscroll="handleLyricScroll"
+      >
+        <view wx:if="{{lyrics.length}}" class="lyrics-list">
+          <text
+            wx:for="{{lyrics}}"
+            wx:key="key"
+            id="lyric-{{index}}"
+            data-index="{{index}}"
+            data-time="{{item.time}}"
+            bindtap="handleLyricTap"
+            class="lyrics-line {{hasSynchronizedLyrics && index === activeLyricIndex ? 'lyrics-line--active' : ''}}"
+          >
+            {{item.text}}
+          </text>
+        </view>
+        <view wx:else class="lyrics-empty">暂无唱词</view>
+      </scroll-view>
+    </view>
 
     <view class="progress-area">
       <slider
@@ -82,7 +84,7 @@
       </view>
       <text wx:if="{{status === 'error'}}" class="player-error">播放失败，点击播放重试</text>
     </view>
-  </block>
+  </view>
 </view>
 
 <play-queue visible="{{queueVisible}}" bindclose="closeQueue" />

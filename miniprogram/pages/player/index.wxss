@@ -1,24 +1,35 @@
 .player-page {
-  min-height: 100vh;
+  height: 100vh;
+  min-height: 0;
+  overflow: hidden;
   box-sizing: border-box;
-  padding: 36rpx 42rpx calc(38rpx + env(safe-area-inset-bottom));
+  padding: 16rpx 36rpx calc(16rpx + env(safe-area-inset-bottom));
   background: #eef2ee;
 }
 
+.player-content {
+  display: flex;
+  height: 100%;
+  min-height: 0;
+  flex-direction: column;
+}
+
 .player-artwork {
-  width: 480rpx;
-  height: 480rpx;
-  margin: 8rpx auto 0;
+  width: 360rpx;
+  height: 360rpx;
+  margin: 0 auto;
   overflow: hidden;
-  border-radius: 38rpx;
-  box-shadow: 0 28rpx 70rpx rgba(35, 58, 47, 0.16);
+  flex: none;
+  border-radius: 32rpx;
+  box-shadow: 0 20rpx 52rpx rgba(35, 58, 47, 0.14);
 }
 
 .player-heading {
   display: flex;
   align-items: center;
+  flex: none;
   flex-direction: column;
-  margin-top: 34rpx;
+  margin-top: 16rpx;
   text-align: center;
 }
 
@@ -26,7 +37,7 @@
   max-width: 100%;
   overflow: hidden;
   color: #263a30;
-  font-size: 40rpx;
+  font-size: 36rpx;
   font-weight: 650;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -35,7 +46,7 @@
 .player-heading__subtitle,
 .player-heading__artist,
 .player-heading__album {
-  margin-top: 9rpx;
+  margin-top: 5rpx;
   font-size: 24rpx;
 }
 
@@ -49,11 +60,14 @@
   font-weight: 600;
 }
 
+.lyrics-section {
+  min-height: 0;
+  margin-top: 14rpx;
+  flex: 1 1 auto;
+}
+
 .lyrics-view {
-  height: 38vh;
-  min-height: 440rpx;
-  max-height: 600rpx;
-  margin-top: 24rpx;
+  height: 100%;
   border-radius: 26rpx;
   background: rgba(255, 255, 255, 0.52);
 }
@@ -91,7 +105,8 @@
 }
 
 .progress-area {
-  margin-top: 22rpx;
+  margin-top: 12rpx;
+  flex: none;
 }
 
 .progress-area slider {
@@ -108,7 +123,8 @@
 }
 
 .player-controls {
-  margin-top: 12rpx;
+  margin-top: 8rpx;
+  flex: none;
   text-align: center;
 }
 
@@ -164,7 +180,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 24rpx;
+  margin-top: 12rpx;
   gap: 54rpx;
 }
 
@@ -228,4 +244,53 @@
   background: #4b6e5d;
   font-size: 25rpx;
   line-height: 78rpx;
+}
+
+@media (max-height: 700px) {
+  .player-page {
+    padding-top: 8rpx;
+    padding-bottom: calc(8rpx + env(safe-area-inset-bottom));
+  }
+
+  .player-artwork {
+    width: 300rpx;
+    height: 300rpx;
+    border-radius: 28rpx;
+  }
+
+  .player-heading {
+    margin-top: 8rpx;
+  }
+
+  .player-heading__title {
+    font-size: 34rpx;
+  }
+
+  .player-heading__subtitle,
+  .player-heading__artist,
+  .player-heading__album {
+    margin-top: 3rpx;
+    font-size: 22rpx;
+  }
+
+  .lyrics-section {
+    margin-top: 8rpx;
+  }
+
+  .progress-area {
+    margin-top: 6rpx;
+  }
+
+  .player-controls {
+    margin-top: 4rpx;
+  }
+
+  .mode-button,
+  .queue-button {
+    line-height: 56rpx;
+  }
+
+  .transport-controls {
+    margin-top: 6rpx;
+  }
 }
