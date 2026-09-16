@@ -146,7 +146,15 @@ pnpm dev:admin
 
 `VITE_API_BASE_URL` 用于配置管理后台访问的 API 根地址，默认开发值为 `http://localhost:3000/api`。Server 通过 `ADMIN_ORIGIN` 控制允许访问 Admin API 的前端来源，默认值为 `http://localhost:5173`。修改 Vite 端口或部署地址时，需要同步调整这两个变量并重新启动对应服务。
 
-管理后台当前包含：首页数据概览、曲目管理、专辑管理、艺术家管理和分类管理。各资源支持分页列表、新增、编辑和删除。曲目表单既可手动填写媒体 URL，也可经 NestJS 上传音频、封面和 LRC 文件到腾讯云 COS；上传与保存曲目是两个独立操作。
+生产部署将 Admin 静态文件放在 `/admin/`，NestJS API 仍位于 `/api/`。构建时使用：
+
+```bash
+pnpm --filter admin build
+```
+
+Admin 的 build 脚本默认设置 `VITE_API_BASE_URL=/api`，会覆盖开发机器上可能存在的 `admin/.env`，避免把本地 API 地址编进生产包；需要特殊构建地址时可在命令前显式设置该环境变量。构建产物在 `admin/dist/`，静态资源路径以 `/admin/assets/` 开头；Nginx 需对 `/admin/*` 提供 SPA fallback 到 `/admin/index.html`，并把 `/api/*` 转发给 NestJS。开发模式仍以 `pnpm dev:admin` 在 `http://localhost:5173/` 启动，开发 API 地址可通过 `admin/.env.example` 所示的 `VITE_API_BASE_URL` 配置。
+
+管理后台当前包含：首页数据概览、曲目管理、专辑管理、艺术家管理和分类管理。各资源支持分页列表、新增、编辑和删除。曲目表单既可手动填写媒体 URL，也可经 NestJS 上传音频、封面和 LRC 文件到腾讯云 COS；上传与保存曲目是两个独立操作。选择音频文件时，浏览器会尝试从本地文件读取时长并在上传成功后填入整数秒，管理员仍可手动修改；读取失败不影响上传。
 
 访问管理页面会先跳转 `/login`。登录成功后 access token 保存在浏览器 `localStorage` 的 `fanyinji_admin_token` 中；请求层只对 `/admin/*` 请求统一附加 Bearer Token。Token 无效或过期时会自动清理并返回登录页。
 

@@ -5,6 +5,7 @@ import { App as AntdApp, ConfigProvider } from 'antd';
 import './index.css';
 import App from './App.tsx';
 import { AuthProvider } from './auth/AuthProvider';
+import { adminBasename } from './config/admin-path';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -18,7 +19,7 @@ createRoot(document.getElementById('root')!).render(
       }}
     >
       <AntdApp>
-        <BrowserRouter>
+        <BrowserRouter basename={adminBasename}>
           <AuthProvider>
             <App />
           </AuthProvider>

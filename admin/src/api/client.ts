@@ -1,9 +1,12 @@
 import type { ApiErrorResponse, ApiResponse, PaginatedResponse, PaginationQuery } from './types';
 import { clearToken, getToken } from '../auth/storage';
+import { adminPath } from '../config/admin-path';
 
 const configuredBaseUrl = import.meta.env.VITE_API_BASE_URL?.trim();
 
-export const apiBaseUrl = (configuredBaseUrl || 'http://localhost:3000/api').replace(/\/$/, '');
+export const apiBaseUrl = (
+  configuredBaseUrl || (import.meta.env.PROD ? '/api' : 'http://localhost:3000/api')
+).replace(/\/$/, '');
 
 export class ApiError extends Error {
   readonly code: string;
@@ -74,8 +77,9 @@ async function requestEnvelope<T>(path: string, options: RequestOptions = {}): P
 
   if (response.status === 401) {
     clearToken();
-    if (window.location.pathname !== '/login') {
-      window.location.replace('/login');
+    const loginPath = adminPath('/login');
+    if (window.location.pathname !== loginPath) {
+      window.location.replace(loginPath);
     }
   }
 

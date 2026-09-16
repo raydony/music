@@ -14,7 +14,7 @@
     "build": "pnpm --filter server build && pnpm --filter admin build",
     "lint": "pnpm -r --if-present lint",
     "typecheck": "pnpm -r --if-present typecheck",
-    "test": "pnpm --filter server test",
+    "test": "pnpm --filter server test && pnpm --filter admin test",
     "test:e2e": "pnpm --filter server test:e2e",
     "format": "prettier --write .",
     "format:check": "prettier --check .",

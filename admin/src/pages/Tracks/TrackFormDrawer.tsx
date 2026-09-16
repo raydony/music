@@ -19,7 +19,8 @@ import { useEffect, useMemo, useState } from 'react';
 import { uploadMedia, type MediaUploadResult, type UploadType } from '../../api/uploads';
 import type { Album, Artist, Category, Track, TrackInput } from '../../types/catalog';
 import { getErrorMessage } from '../../utils/api-error';
-import { emptyToNull } from '../../utils/format';
+import { uploadAudioWithDuration } from '../../utils/audio-duration';
+import { emptyToNull, formatDuration } from '../../utils/format';
 
 interface TrackFormDrawerProps {
   open: boolean;
@@ -109,9 +110,21 @@ export function TrackFormDrawer({
     }
     setUploadingType(type);
     try {
-      const result = await uploadMedia(file, type);
+      const result =
+        type === 'audio'
+          ? await uploadAudioWithDuration(file, {
+              upload: (selectedFile) => uploadMedia(selectedFile, 'audio'),
+              onUploaded: (uploaded, duration) => {
+                form.setFieldValue('audioUrl', uploaded.url);
+                if (duration !== undefined) form.setFieldValue('duration', duration);
+              },
+              onDurationUnavailable: () => {
+                void messageApi.warning('未能自动读取音频时长，请手动填写');
+              },
+            })
+          : await uploadMedia(file, type);
+      if (!result) return;
       if (type === 'audio') {
-        form.setFieldValue('audioUrl', result.url);
         await form.validateFields(['audioUrl']);
       } else if (type === 'cover') {
         form.setFieldValue('coverUrl', result.url);
@@ -160,6 +173,7 @@ export function TrackFormDrawer({
   };
 
   const busy = submitting || uploading;
+  const duration = Form.useWatch('duration', form);
 
   return (
     <>
@@ -338,6 +352,11 @@ export function TrackFormDrawer({
               <Form.Item
                 label="时长（秒）"
                 name="duration"
+                extra={
+                  typeof duration === 'number' && Number.isFinite(duration)
+                    ? `${duration} 秒（${formatDuration(duration)}）`
+                    : undefined
+                }
                 rules={[
                   { required: true, message: '请输入时长' },
                   { type: 'number', min: 0, message: '时长不能小于 0 秒' },
