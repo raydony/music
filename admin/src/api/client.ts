@@ -39,10 +39,17 @@ function isApiErrorResponse(value: unknown): value is ApiErrorResponse {
 async function requestEnvelope<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const headers = new Headers(options.headers);
   const token = path.startsWith('/admin/') ? getToken() : null;
+  const isFormData = options.body instanceof FormData;
+  const requestBody: BodyInit | undefined =
+    options.body === undefined
+      ? undefined
+      : isFormData
+        ? (options.body as FormData)
+        : JSON.stringify(options.body);
   if (token) {
     headers.set('Authorization', `Bearer ${token}`);
   }
-  if (options.body !== undefined) {
+  if (options.body !== undefined && !isFormData) {
     headers.set('Content-Type', 'application/json');
   }
 
@@ -51,7 +58,7 @@ async function requestEnvelope<T>(path: string, options: RequestOptions = {}): P
     response = await fetch(`${apiBaseUrl}${path}`, {
       ...options,
       headers,
-      body: options.body === undefined ? undefined : JSON.stringify(options.body),
+      body: requestBody,
     });
   } catch (error) {
     console.error('API network error', error);

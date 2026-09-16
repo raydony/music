@@ -136,6 +136,24 @@
   margin: -10px 0 20px;
 }
 
+.upload-result {
+  display: block;
+  margin-top: 8px;
+  overflow-wrap: anywhere;
+}
+
+.media-url-input {
+  min-width: 0;
+  flex: 1;
+}
+
+.track-cover-preview {
+  display: block;
+  margin-top: 12px;
+  border-radius: 8px;
+  object-fit: cover;
+}
+
 .full-width {
   width: 100%;
 }

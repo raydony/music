@@ -192,16 +192,18 @@ export function TracksPage() {
           onChange={list.setPage}
         />
       </div>
-      <TrackFormDrawer
-        open={formOpen}
-        track={editing}
-        artists={artists}
-        albums={albums}
-        categories={categories}
-        submitting={submitting}
-        onCancel={() => !submitting && setFormOpen(false)}
-        onSubmit={save}
-      />
+      {formOpen ? (
+        <TrackFormDrawer
+          open
+          track={editing}
+          artists={artists}
+          albums={albums}
+          categories={categories}
+          submitting={submitting}
+          onCancel={() => !submitting && setFormOpen(false)}
+          onSubmit={save}
+        />
+      ) : null}
     </div>
   );
 }

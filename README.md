@@ -146,9 +146,27 @@ pnpm dev:admin
 
 `VITE_API_BASE_URL` 用于配置管理后台访问的 API 根地址，默认开发值为 `http://localhost:3000/api`。Server 通过 `ADMIN_ORIGIN` 控制允许访问 Admin API 的前端来源，默认值为 `http://localhost:5173`。修改 Vite 端口或部署地址时，需要同步调整这两个变量并重新启动对应服务。
 
-管理后台当前包含：首页数据概览、曲目管理、专辑管理、艺术家管理和分类管理。各资源支持分页列表、新增、编辑和删除；媒体字段当前只填写 URL，不上传或转发文件。
+管理后台当前包含：首页数据概览、曲目管理、专辑管理、艺术家管理和分类管理。各资源支持分页列表、新增、编辑和删除。曲目表单既可手动填写媒体 URL，也可经 NestJS 上传音频、封面和 LRC 文件到腾讯云 COS；上传与保存曲目是两个独立操作。
 
 访问管理页面会先跳转 `/login`。登录成功后 access token 保存在浏览器 `localStorage` 的 `fanyinji_admin_token` 中；请求层只对 `/admin/*` 请求统一附加 Bearer Token。Token 无效或过期时会自动清理并返回登录页。
+
+## 腾讯云 COS 媒体上传
+
+在 `server/.env` 中配置以下变量，不要把真实密钥提交到 Git：
+
+```env
+TENCENT_COS_SECRET_ID=
+TENCENT_COS_SECRET_KEY=
+TENCENT_COS_BUCKET=
+TENCENT_COS_REGION=ap-beijing
+TENCENT_COS_PUBLIC_BASE_URL=
+```
+
+`TENCENT_COS_BUCKET` 使用包含 APPID 后缀的完整 Bucket 名，例如 `bucket-name-1250000000`。`TENCENT_COS_PUBLIC_BASE_URL` 可填写已配置 HTTPS 的 CDN 或自定义域名；留空时服务端按 Bucket 和 Region 生成 COS 官方 HTTPS 地址。用于服务端的腾讯云子账号应只授予目标 Bucket 所需的对象上传权限，不应使用账号根密钥。
+
+上传接口为 `POST /api/admin/uploads`，使用 `multipart/form-data` 的 `file` 和 `type` 字段，`type` 为 `audio`、`cover` 或 `lyrics`。接口要求有效 Admin Bearer Token。可以在管理后台“新增曲目”或“编辑曲目”中直接测试：上传完成后音频/封面 URL 会自动写入表单，LRC 的 UTF-8 文本会写入现有 `lyricsLrc` 字段；只有再次点击“保存”才会创建或更新曲目。
+
+本方案由浏览器把文件传给 NestJS，再由 NestJS 服务端上传 COS，因此 Admin 浏览器不直接访问 COS 上传 API，也不持有 SecretId/SecretKey；仅为此上传链路无需配置 Bucket CORS。如果以后让 Web 页面直接读取 COS 媒体或改为浏览器直传，应按实际 Admin 域名最小化配置允许的 Origin、Method 和 Header。微信小程序播放媒体仍需按微信平台要求配置合法 HTTPS 域名。
 
 ## 打开微信小程序
 

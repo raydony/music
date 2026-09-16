@@ -4,6 +4,8 @@ import { JwtService } from '@nestjs/jwt';
 import { Server } from 'node:http';
 import { hash } from 'bcryptjs';
 import request from 'supertest';
+import type { CosUploadInput } from '../src/admin-upload/admin-upload.types.js';
+import { CosStorageService } from '../src/admin-upload/cos-storage.service.js';
 import { AppModule } from '../src/app.module.js';
 import { configureApp } from '../src/configure-app.js';
 import { PrismaService } from '../src/prisma/prisma.service.js';
@@ -85,11 +87,21 @@ describe('Music catalog API (e2e)', () => {
   let httpServer: Server;
   let adminToken: string;
   let expiredAdminToken: string;
+  const cosObjectKeys: string[] = [];
+  const fakeCosStorage = {
+    upload: vi.fn(async (input: CosUploadInput) => {
+      cosObjectKeys.push(input.key);
+      return { url: `https://e2e-bucket.cos.ap-beijing.myqcloud.com/${input.key}` };
+    }),
+  };
 
   beforeAll(async () => {
     const moduleFixture: TestingModule = await Test.createTestingModule({
       imports: [AppModule],
-    }).compile();
+    })
+      .overrideProvider(CosStorageService)
+      .useValue(fakeCosStorage)
+      .compile();
 
     app = moduleFixture.createNestApplication();
     configureApp(app);
@@ -320,6 +332,123 @@ describe('Music catalog API (e2e)', () => {
         .auth(adminToken, { type: 'bearer' })
         .expect(200);
       await request(httpServer).get('/api/tracks').expect(200);
+    });
+  });
+
+  describe('admin media uploads', () => {
+    beforeEach(() => {
+      cosObjectKeys.length = 0;
+      fakeCosStorage.upload.mockClear();
+    });
+
+    it('requires an Admin JWT', async () => {
+      await request(httpServer)
+        .post('/api/admin/uploads')
+        .field('type', 'audio')
+        .attach('file', Buffer.from('ID3-test', 'binary'), {
+          filename: 'test.mp3',
+          contentType: 'audio/mpeg',
+        })
+        .expect(401);
+
+      expect(fakeCosStorage.upload).not.toHaveBeenCalled();
+    });
+
+    it('accepts a valid MP3 and returns an HTTPS COS URL', async () => {
+      const response = await request(httpServer)
+        .post('/api/admin/uploads')
+        .auth(adminToken, { type: 'bearer' })
+        .field('type', 'audio')
+        .attach('file', Buffer.from('ID3-test', 'binary'), {
+          filename: '炉香赞.mp3',
+          contentType: 'audio/mpeg',
+        })
+        .expect(201);
+      const body = response.body as ApiEnvelope<{
+        type: string;
+        key: string;
+        url: string;
+        originalName: string;
+      }>;
+
+      expect(body.data.type).toBe('audio');
+      expect(body.data.key).toMatch(/^audio\/\d{4}\/\d{2}\/[0-9a-f-]+\.mp3$/);
+      expect(body.data.url).toMatch(/^https:\/\//);
+      expect(body.data.originalName).toBe('炉香赞.mp3');
+    });
+
+    it('accepts an MPEG frame MP3 sent as application/octet-stream', async () => {
+      const response = await request(httpServer)
+        .post('/api/admin/uploads')
+        .auth(adminToken, { type: 'bearer' })
+        .field('type', 'audio')
+        .attach('file', Buffer.from([0xff, 0xfb, 0x90, 0x64, 0x00, 0x00]), {
+          filename: 'frame-header.mp3',
+          contentType: 'application/octet-stream',
+        })
+        .expect(201);
+
+      expect((response.body as ApiEnvelope<{ key: string }>).data.key).toMatch(/\.mp3$/);
+      expect(fakeCosStorage.upload).toHaveBeenCalledOnce();
+    });
+
+    it('rejects an executable and a forged MP3', async () => {
+      await request(httpServer)
+        .post('/api/admin/uploads')
+        .auth(adminToken, { type: 'bearer' })
+        .field('type', 'audio')
+        .attach('file', Buffer.from('MZ executable'), {
+          filename: 'malware.exe',
+          contentType: 'application/octet-stream',
+        })
+        .expect(400);
+
+      await request(httpServer)
+        .post('/api/admin/uploads')
+        .auth(adminToken, { type: 'bearer' })
+        .field('type', 'audio')
+        .attach('file', Buffer.from('not really an mp3'), {
+          filename: 'forged.mp3',
+          contentType: 'audio/mpeg',
+        })
+        .expect(400);
+
+      expect(fakeCosStorage.upload).not.toHaveBeenCalled();
+    });
+
+    it('does not reuse object keys for equal original filenames', async () => {
+      const uploadOnce = () =>
+        request(httpServer)
+          .post('/api/admin/uploads')
+          .auth(adminToken, { type: 'bearer' })
+          .field('type', 'audio')
+          .attach('file', Buffer.from('ID3-same', 'binary'), {
+            filename: 'same.mp3',
+            contentType: 'audio/mpeg',
+          })
+          .expect(201);
+
+      await uploadOnce();
+      await uploadOnce();
+
+      expect(cosObjectKeys).toHaveLength(2);
+      expect(cosObjectKeys[0]).not.toBe(cosObjectKeys[1]);
+    });
+
+    it('returns UTF-8 LRC content without changing its text semantics', async () => {
+      const content = '[00:00.00]炉香乍爇\n[00:05.20]法界蒙熏';
+      const response = await request(httpServer)
+        .post('/api/admin/uploads')
+        .auth(adminToken, { type: 'bearer' })
+        .field('type', 'lyrics')
+        .attach('file', Buffer.from(content, 'utf8'), {
+          filename: '歌词.lrc',
+          contentType: 'text/plain',
+        })
+        .expect(201);
+
+      expect((response.body as ApiEnvelope<{ content: string }>).data.content).toBe(content);
+      expect(cosObjectKeys[0]).toMatch(/^lyrics\/\d{4}\/\d{2}\/[0-9a-f-]+\.lrc$/);
     });
   });
 
