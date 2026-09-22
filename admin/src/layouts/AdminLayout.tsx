@@ -15,14 +15,18 @@ const menuItems = [
 const pageTitles: Record<string, string> = Object.fromEntries(
   menuItems.map((item) => [item.key, item.label]),
 );
+pageTitles['/tracks/import'] = '批量导入音乐';
 
 export function AdminLayout() {
   const location = useLocation();
   const navigate = useNavigate();
   const { admin, logout } = useAuth();
-  const selectedPath = menuItems.some((item) => item.key === location.pathname)
-    ? location.pathname
-    : '/';
+  const selectedPath =
+    menuItems.find(
+      (item) =>
+        item.key === location.pathname ||
+        (item.key !== '/' && location.pathname.startsWith(`${item.key}/`)),
+    )?.key ?? '/';
 
   const handleLogout = (): void => {
     logout();
@@ -46,7 +50,9 @@ export function AdminLayout() {
       <Layout>
         <Header className="header">
           <Typography.Text strong>
-            {pageTitles[selectedPath] ?? '佛教音乐数字资源管理平台'}
+            {pageTitles[location.pathname] ??
+              pageTitles[selectedPath] ??
+              '佛教音乐数字资源管理平台'}
           </Typography.Text>
           <Space size="middle">
             <Typography.Text type="secondary">{admin?.username}</Typography.Text>

@@ -161,15 +161,18 @@ export function TracksPage() {
         title="曲目管理"
         description="维护音频地址、歌词、曲目关系与发布状态"
         extra={
-          <Button
-            type="primary"
-            onClick={() => {
-              setEditing(undefined);
-              setFormOpen(true);
-            }}
-          >
-            新增曲目
-          </Button>
+          <Space>
+            <Button onClick={() => navigate('/tracks/import')}>批量导入</Button>
+            <Button
+              type="primary"
+              onClick={() => {
+                setEditing(undefined);
+                setFormOpen(true);
+              }}
+            >
+              新增曲目
+            </Button>
+          </Space>
         }
       />
       <div className="table-card">

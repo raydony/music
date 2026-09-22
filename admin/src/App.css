@@ -158,6 +158,58 @@
   width: 100%;
 }
 
+.bulk-loading {
+  min-height: 360px;
+  display: grid;
+  place-items: center;
+}
+
+.bulk-upload-dragger .ant-upload-drag {
+  padding: 18px;
+  border-color: #cbd8d1;
+  background: #fbfcfb;
+}
+
+.bulk-upload-dragger h4.ant-typography {
+  margin: 0 0 6px;
+  color: #31594b;
+}
+
+.bulk-settings-card,
+.bulk-summary-card {
+  border-color: #e1e8e4;
+}
+
+.bulk-setting-select {
+  width: 190px;
+}
+
+.bulk-publish-select {
+  width: 110px;
+}
+
+.bulk-table-card {
+  overflow-x: auto;
+}
+
+.bulk-metadata-note,
+.bulk-field-note,
+.bulk-error-text {
+  display: block;
+  max-width: 100%;
+  font-size: 12px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.bulk-progress {
+  width: min(360px, 100%);
+}
+
+.bulk-progress .ant-progress {
+  margin-top: 5px;
+}
+
 @media (max-width: 900px) {
   .sidebar {
     display: none;
