@@ -2,13 +2,14 @@
 
 ## 项目简介
 
-这是一个面向佛教音乐、梵呗、赞偈、诵经及佛教器乐内容的微信小程序 MVP。当前已具备 PostgreSQL/Prisma 数据层、公共曲库查询 API、React 管理后台，以及调用真实 Public API 的微信小程序曲库浏览、全局播放队列、后台音频、Mini Player 和同步唱词链路。
+这是一个面向佛教音乐、梵呗、赞偈、诵经及佛教器乐内容的音乐平台 MVP。当前已具备 PostgreSQL/Prisma 数据层、公共曲库查询 API、React 管理后台、微信小程序，以及开发中的 Mobile H5。
 
 ## 技术栈
 
 - 微信原生小程序、TypeScript、WXML、WXSS
 - NestJS 11、TypeScript
 - React 19、Vite、Ant Design
+- React 19、Vite（Mobile H5）
 - PostgreSQL 18、Docker Compose
 - pnpm workspace
 
@@ -19,6 +20,7 @@ music/
 ├── server/       # NestJS REST API
 ├── admin/        # React + Vite 管理后台
 ├── miniprogram/  # 微信原生 TypeScript 小程序
+├── mobile/       # 手机浏览器访问的 React H5
 ├── docs/         # 项目文档
 └── docker-compose.yml
 ```
@@ -175,6 +177,22 @@ TENCENT_COS_PUBLIC_BASE_URL=
 上传接口为 `POST /api/admin/uploads`，使用 `multipart/form-data` 的 `file` 和 `type` 字段，`type` 为 `audio`、`cover` 或 `lyrics`。接口要求有效 Admin Bearer Token。可以在管理后台“新增曲目”或“编辑曲目”中直接测试：上传完成后音频/封面 URL 会自动写入表单，LRC 的 UTF-8 文本会写入现有 `lyricsLrc` 字段；只有再次点击“保存”才会创建或更新曲目。
 
 本方案由浏览器把文件传给 NestJS，再由 NestJS 服务端上传 COS，因此 Admin 浏览器不直接访问 COS 上传 API，也不持有 SecretId/SecretKey；仅为此上传链路无需配置 Bucket CORS。如果以后让 Web 页面直接读取 COS 媒体或改为浏览器直传，应按实际 Admin 域名最小化配置允许的 Origin、Method 和 Header。微信小程序播放媒体仍需按微信平台要求配置合法 HTTPS 域名。
+
+## 启动 Mobile H5
+
+Mobile H5 使用现有 Public API；开发时由 Vite 将同源 `/api` 代理到 NestJS，不依赖跨域设置。先启动数据库和 Server，然后在根目录执行：
+
+```bash
+cp mobile/.env.example mobile/.env.local
+pnpm install
+pnpm dev:mobile
+```
+
+浏览器打开 `http://localhost:5174/`。`mobile/.env.local` 中默认 `VITE_API_BASE_URL=/api`、`DEV_API_TARGET=http://localhost:3000`；如果 Server 端口不同，仅修改后者。生产构建默认同源 `/api`，运行 `pnpm --filter mobile build`，产物位于 `mobile/dist/`，部署到网站根路径 `/`，并将 `/api/*` 反向代理到 Server。生产环境需为 H5 路由配置 SPA fallback。
+
+Mobile H5 提供首页、曲库、分类与分类曲目、专辑与专辑详情、全局 Mini Player、播放页及同步 LRC 歌词。点击曲目会以当前列表建立播放队列；切换页面不会重建音频。搜索仅筛选当前已加载曲目，并非全库搜索。浏览器首次播放须由用户点击触发。
+
+已收录的测试数据中部分 `example.com` 音频/图片 URL 是不可用占位地址；H5 会显示封面 fallback 或播放错误，但要验证这些曲目，仍需由管理员替换成有权限使用的真实 HTTPS 媒体资源。Mobile 单元测试可运行 `pnpm --filter mobile test`。
 
 ## 打开微信小程序
 

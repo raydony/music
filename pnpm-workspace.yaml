@@ -2,6 +2,7 @@ packages:
   - server
   - admin
   - miniprogram
+  - mobile
 
 allowBuilds:
   '@prisma/engines': true

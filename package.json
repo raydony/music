@@ -11,10 +11,11 @@
   "scripts": {
     "dev:server": "pnpm --filter server start:dev",
     "dev:admin": "pnpm --filter admin dev",
-    "build": "pnpm --filter server build && pnpm --filter admin build",
+    "dev:mobile": "pnpm --filter mobile dev",
+    "build": "pnpm --filter server build && pnpm --filter admin build && pnpm --filter mobile build",
     "lint": "pnpm -r --if-present lint",
     "typecheck": "pnpm -r --if-present typecheck",
-    "test": "pnpm --filter server test && pnpm --filter admin test",
+    "test": "pnpm --filter server test && pnpm --filter admin test && pnpm --filter mobile test",
     "test:e2e": "pnpm --filter server test:e2e",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
