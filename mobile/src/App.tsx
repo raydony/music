@@ -70,6 +70,15 @@ function MobileLayout() {
     >
       <main className="app-main">
         <Outlet />
+        {!isPlayerPage && (
+          <footer className="page-footer">
+            <span>© 2026 梵音集</span>
+            <span aria-hidden="true"> · </span>
+            <a href="https://beian.miit.gov.cn/" target="_blank" rel="noopener noreferrer">
+              晋ICP备2026014958号-1
+            </a>
+          </footer>
+        )}
       </main>
       {!isPlayerPage && state.currentTrack && <MiniPlayer />}
       {!isPlayerPage && (

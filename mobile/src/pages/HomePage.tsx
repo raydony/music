@@ -167,7 +167,6 @@ export function HomePage() {
           </section>
         </>
       )}
-      <footer className="page-footer">梵音集 · 让每一次聆听有所停留</footer>
     </div>
   );
 }
